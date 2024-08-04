@@ -24,10 +24,17 @@ public class StockHistoryController {
         @RequestParam("dateFrom") String dateFromStr, // "yyyy-MM-dd"
         @RequestParam("dateTo") String dateToStr // "yyyy-MM-dd"
     ) {
+        LocalDate dateFrom = convertStringToLocalDate(dateFromStr);
+        LocalDate dateTo = convertStringToLocalDate(dateToStr);
+
+        if (!isValidDateRange(dateFrom, dateTo)) {
+            return ResponseEntity.badRequest().build();
+        }
+
         ListStockHistoryUseCase.Input input = new ListStockHistoryUseCase.Input(
             companyCode,
-            convertStringToLocalDate(dateFromStr),
-            convertStringToLocalDate(dateToStr)
+            dateFrom,
+            dateTo
         );
         ListStockHistoryUseCase.Output output = listStockHistoryUseCase.execute(input);
         StockDailyHistory firstHistory = output.getDailyHistories().stream().findFirst().orElseThrow();
@@ -41,5 +48,9 @@ public class StockHistoryController {
 
     private static LocalDate convertStringToLocalDate(String dateStr) {
         return LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+    }
+
+    private static boolean isValidDateRange(LocalDate dateFrom, LocalDate dateTo) {
+        return dateFrom.isEqual(dateTo) || dateFrom.isBefore(dateTo);
     }
 }
