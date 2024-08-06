@@ -79,6 +79,10 @@ jobs:
     needs: build-and-push
 
     steps:
+      - name: Test SSH Connection
+        run: |
+          ssh -i ${{ secrets.SSH_PRIVATE_KEY }} -o "StrictHostKeyChecking=no" ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} echo "SSH Connection Successful"
+
       - name: Run Docker image on Remote server
         uses: appleboy/ssh-action@v1.0.3
         env:
