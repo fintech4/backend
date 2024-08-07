@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: toou
+  profiles:
+    default: local
+---
+spring:
+  config:
+    activate:
+      on-profile: local, prod
+    import: classpath:application-private.yml
