@@ -13,8 +13,8 @@ import java.time.format.DateTimeFormatter;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/stock/history")
-public class StockHistoryController {
+@RequestMapping("/api/stocks")
+public class StockController {
 
     private final ListStockHistoryUseCase listStockHistoryUseCase;
 
