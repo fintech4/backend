@@ -8,5 +8,6 @@ import java.util.List;
 
 public interface StockHistoryJpaRepository extends JpaRepository<StockHistoryEntity, Long> {
 
-    List<StockHistoryEntity> findAllByCompanyCodeAndDateBetween(String companyCode, LocalDate dateFrom, LocalDate dateTo);
+	List<StockHistoryEntity> findAllByStockCodeAndDateBetween(String stockCode, LocalDate dateFrom,
+			LocalDate dateTo);
 }

@@ -9,19 +9,21 @@ import java.util.List;
 
 public interface ListStockHistoryUseCase {
 
-    Output execute(Input input);
+	Output execute(Input input);
 
-    @AllArgsConstructor
-    @Data
-    class Input {
-        String companyCode;
-        LocalDate dateFrom;
-        LocalDate dateTo;
-    }
+	@AllArgsConstructor
+	@Data
+	class Input {
 
-    @AllArgsConstructor
-    @Data
-    class Output {
-        List<StockDailyHistory> dailyHistories;
-    }
+		String stockCode;
+		LocalDate dateFrom;
+		LocalDate dateTo;
+	}
+
+	@AllArgsConstructor
+	@Data
+	class Output {
+
+		List<StockDailyHistory> dailyHistories;
+	}
 }
