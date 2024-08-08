@@ -38,11 +38,6 @@ public class AccountController {
 		return ResponseEntity.ok().body(response);
 	}
 
-	@GetMapping("/deposit")
-	ResponseEntity<String> deposit() {
-		return ResponseEntity.ok("deposit");
-	}
-
 	@GetMapping("/holdings")
 	ResponseEntity<String> holdingListStock() {
 		return ResponseEntity.ok("deposit");
@@ -51,11 +46,6 @@ public class AccountController {
 	@GetMapping("/stocks/{stockCode}/sellable")
 	ResponseEntity<String> sellableStockCount(@PathVariable String stockCode) {
 		return ResponseEntity.ok("sellableStockCount");
-	}
-
-	@GetMapping("/yield")
-	ResponseEntity<String> yield() {
-		return ResponseEntity.ok("yield");
 	}
 
 	@PostMapping("/stocks/{stockCode}/buy")
