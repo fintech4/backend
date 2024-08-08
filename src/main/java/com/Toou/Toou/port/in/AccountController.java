@@ -2,8 +2,11 @@ package com.Toou.Toou.port.in;
 
 import com.Toou.Toou.domain.model.UserAccount;
 import com.Toou.Toou.port.in.dto.AccountAssetResponse;
+import com.Toou.Toou.port.in.dto.HoldingIndividualDto;
+import com.Toou.Toou.port.in.dto.HoldingListResponse;
 import com.Toou.Toou.port.in.dto.UserAccountResponse;
 import com.Toou.Toou.usecase.AccountAssetUseCase;
+import com.Toou.Toou.usecase.AccountHoldingUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AccountController {
 
 	private final AccountAssetUseCase accountAssetUseCase;
+	private final AccountHoldingUseCase accountHoldingUseCase;
 
 	private static final UserAccount DUMMY_USER_ACCOUNT = new UserAccount(
 			1L, "kakaoId", "test@example.com", "testuser", ""
@@ -39,8 +43,12 @@ public class AccountController {
 	}
 
 	@GetMapping("/holdings")
-	ResponseEntity<String> holdingListStock() {
-		return ResponseEntity.ok("deposit");
+	ResponseEntity<HoldingListResponse> holdingListStock() {
+		AccountHoldingUseCase.Input input = new AccountHoldingUseCase.Input(DUMMY_USER_ACCOUNT);
+		AccountHoldingUseCase.Output output = accountHoldingUseCase.execute(input);
+		HoldingListResponse response = new HoldingListResponse(output.getHoldings().stream().map(
+				HoldingIndividualDto::fromDomainModel).toList());
+		return ResponseEntity.ok().body(response);
 	}
 
 	@GetMapping("/stocks/{stockCode}/sellable")
