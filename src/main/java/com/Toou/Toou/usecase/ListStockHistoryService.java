@@ -22,12 +22,13 @@ public class ListStockHistoryService implements ListStockHistoryUseCase {
 	private final StockHistoryPort stockHistoryPort;
 	private final StockOpenApiPort stockOpenApiPort;
 
+	private static final List<StockDailyHistory> DUMMY_DAILY_HISTORIES = parseDummyCsvData();
+
 	@Transactional
 	@Override
 	public Output execute(Input input) {
 		//TODO: 더미데이터. 구현 후 삭제
-		List<StockDailyHistory> dummyDailyHistories = parseDummyCsvData();
-		return new Output(dummyDailyHistories);
+		return new Output(DUMMY_DAILY_HISTORIES);
 
 //		List<StockDailyHistory> dailyHistories = stockHistoryPort.findAllHistoriesBetweenDates(
 //				input.stockCode, input.dateFrom, input.dateTo);
@@ -44,7 +45,7 @@ public class ListStockHistoryService implements ListStockHistoryUseCase {
 		return false;
 	}
 
-	private List<StockDailyHistory> parseDummyCsvData() {
+	private static List<StockDailyHistory> parseDummyCsvData() {
 		List<StockDailyHistory> stockDailyHistories = new ArrayList<>();
 		BufferedReader reader = new BufferedReader(new StringReader(dummyCsv()));
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -70,7 +71,7 @@ public class ListStockHistoryService implements ListStockHistoryUseCase {
 		return stockDailyHistories;
 	}
 
-	private String dummyCsv() {
+	private static String dummyCsv() {
 		return """
 				날짜,시가,고가,저가,종가,거래량,등락률
 				2023-01-02,4960,4960,4705,4800,20898,-1.7400204708290685
