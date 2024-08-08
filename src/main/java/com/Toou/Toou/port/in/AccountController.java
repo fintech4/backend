@@ -1,20 +1,27 @@
 package com.Toou.Toou.port.in;
 
+import com.Toou.Toou.domain.model.StockOrder;
 import com.Toou.Toou.domain.model.UserAccount;
 import com.Toou.Toou.port.in.dto.AccountAssetResponse;
 import com.Toou.Toou.port.in.dto.HoldingIndividualDto;
 import com.Toou.Toou.port.in.dto.HoldingListResponse;
 import com.Toou.Toou.port.in.dto.OrderableQuantityResponse;
+import com.Toou.Toou.port.in.dto.StockOrderRequest;
 import com.Toou.Toou.port.in.dto.UserAccountResponse;
+import com.Toou.Toou.port.in.dto.VoidResponse;
 import com.Toou.Toou.usecase.AccountAssetUseCase;
 import com.Toou.Toou.usecase.AccountHoldingUseCase;
 import com.Toou.Toou.usecase.BuyableStockUseCase;
 import com.Toou.Toou.usecase.SellableStockUseCase;
+import com.Toou.Toou.usecase.StockOrderUseCase;
+import jakarta.validation.Valid;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,10 +34,12 @@ public class AccountController {
 	private final AccountHoldingUseCase accountHoldingUseCase;
 	private final SellableStockUseCase sellableStockUseCase;
 	private final BuyableStockUseCase buyableStockUseCase;
+	private final StockOrderUseCase stockOrderUseCase;
 
 	private static final UserAccount DUMMY_USER_ACCOUNT = new UserAccount(
 			1L, "kakaoId", "test@example.com", "testuser", ""
 	);
+	private static final String DUMMY_STOCK_NAME = "더미종목명";
 
 
 	@GetMapping("/user")
@@ -76,14 +85,24 @@ public class AccountController {
 		return ResponseEntity.ok().body(response);
 	}
 
-	@PostMapping("/stocks/{stockCode}/buy")
-	ResponseEntity<String> buyStock(@PathVariable String stockCode) {
-		return ResponseEntity.ok("yield");
+	@PostMapping("/stocks/{stockCode}/order")
+	ResponseEntity<VoidResponse> buyStock(@Valid @RequestBody StockOrderRequest request,
+			@PathVariable String stockCode) {
+		StockOrder stockOrder = StockOrder.builder()
+				.stockCode(stockCode)
+				.stockName(DUMMY_STOCK_NAME)
+				.stockPrice(request.getStockPrice())
+				.orderQuantity(request.getOrderQuantity())
+				.tradeType(request.getTradeType())
+				.userAccount(DUMMY_USER_ACCOUNT)
+				.build();
+		StockOrderUseCase.Input input = new StockOrderUseCase.Input(stockOrder);
+		StockOrderUseCase.Output output = stockOrderUseCase.execute(input);
+		VoidResponse response = new VoidResponse(true);
+		return ResponseEntity.ok().body(response);
 	}
 
-	@PostMapping("/stocks/{stockCode}/sell")
-	ResponseEntity<String> sellStock(@PathVariable String stockCode) {
-		return ResponseEntity.ok("yield");
+	private static boolean isValidTradeType(LocalDate dateFrom, LocalDate dateTo) {
+		return dateFrom.isEqual(dateTo) || dateFrom.isBefore(dateTo);
 	}
-
 }
