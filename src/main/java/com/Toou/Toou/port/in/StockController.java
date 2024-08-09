@@ -26,7 +26,8 @@ public class StockController {
 	private final ListStockMetadataUseCase listStockMetadataUseCase;
 	private final ListStockHistoryUseCase listStockHistoryUseCase;
 
-	private final LocalDate DUMMY_NEWEST_DATE = LocalDate.of(2023, 12, 28);
+	private final LocalDate DUMMY_START_DATE = LocalDate.of(2023, 1, 1);
+	private final LocalDate DUMMY_NEWEST_DATE = LocalDate.of(2023, 12, 31);
 
 	@GetMapping
 	ResponseEntity<StockSearchListResponse> listStockMetadataByName(@RequestParam final String name,
@@ -51,7 +52,7 @@ public class StockController {
 			@RequestParam(value = "dateFrom", required = false) LocalDate dateFrom, // "yyyy-MM-dd"
 			@RequestParam(value = "dateTo", required = false) LocalDate dateTo // "yyyy-MM-dd"
 	) {
-		dateFrom = dateFrom == null ? DUMMY_NEWEST_DATE : dateFrom;
+		dateFrom = dateFrom == null ? DUMMY_START_DATE : dateFrom;
 		dateTo = dateTo == null ? DUMMY_NEWEST_DATE : dateTo;
 
 		if (!isValidDateRange(dateFrom, dateTo)) {
@@ -65,17 +66,8 @@ public class StockController {
 		);
 		ListStockHistoryUseCase.Output output = listStockHistoryUseCase.execute(input);
 		List<StockDailyHistory> stockDailyHistories = output.getDailyHistories();
-		StockDailyHistory firstHistory = stockDailyHistories.stream().findFirst().orElseThrow();
-		StockDailyHistory lastHistory = stockDailyHistories.get(output.getDailyHistories().size() - 1);
-		StockHistoryListResponse response = new StockHistoryListResponse(
-				true,
-				firstHistory.getId(), //DB pk
-				firstHistory.getStockCode(),
-				firstHistory.getStockName(),
-				lastHistory.getPrices().get(3), //전날 종가
-				DUMMY_NEWEST_DATE,
-				output.getDailyHistories().stream().map(StockDailyHistoryDto::fromDomainModel).toList()
-		);
+		StockHistoryListResponse response = buildStockHistoryListResponse(stockDailyHistories,
+				DUMMY_NEWEST_DATE);
 		return ResponseEntity.ok().body(response);
 	}
 
@@ -85,5 +77,22 @@ public class StockController {
 
 	private static boolean isValidDateRange(LocalDate dateFrom, LocalDate dateTo) {
 		return dateFrom.isEqual(dateTo) || dateFrom.isBefore(dateTo);
+	}
+	
+	private static StockHistoryListResponse buildStockHistoryListResponse(
+			List<StockDailyHistory> stockDailyHistories, LocalDate newestDate) {
+		StockDailyHistory firstHistory = stockDailyHistories.stream().findFirst()
+				.orElseThrow(() -> new IllegalStateException("No stock history found"));
+		StockDailyHistory lastHistory = stockDailyHistories.get(stockDailyHistories.size() - 1);
+
+		return new StockHistoryListResponse(
+				true,
+				firstHistory.getId(),
+				firstHistory.getStockCode(),
+				firstHistory.getStockName(),
+				lastHistory.getPrices().get(3),
+				newestDate,
+				stockDailyHistories.stream().map(StockDailyHistoryDto::fromDomainModel).toList()
+		);
 	}
 }
