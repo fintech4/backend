@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
 	@GetMapping("/login/kakao")
-	@Operation(summary = "카카오 로그인 데모", description = "kakaoId로 더미 데이터인 kakao123, kakao456 를 입력하시면 되요 ")
+	@Operation(summary = "카카오 로그인 데모", description = "kakaoId로 더미 데이터인 kakao123, kakao456 를 입력하시면 돼요 ")
 //TODO: OAuth 완료 후 수정
 	public ResponseEntity<VoidResponse> loginWithKakao(@RequestParam String kakaoId,
 			HttpServletResponse response) {
