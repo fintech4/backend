@@ -26,4 +26,18 @@ VALUES (1, 10000, 11000, 9000, 10500, '2023-08-01'),  -- AJ네트웍스
        (2, 20000, 21000, 19500, 20500, '2023-08-01'), -- AK홀딩스
        (2, 20500, 21500, 20000, 21000, '2023-08-02'), -- AK홀딩스
        (3, 15000, 15500, 14500, 15200, '2023-08-01'), -- BGF
-       (3, 15200, 15800, 15000, 15700, '2023-08-02'); -- BGF
+       (3, 15200, 15800, 15000, 15700, '2023-08-02');
+-- BGF
+
+-- 초기 Account Asset 데이터
+INSERT INTO account_asset (kakao_id, total_asset, deposit, total_holdings_value,
+                           total_holdings_quantity, investment_yield)
+VALUES ('kakao123', 500000, 500000, 0, 0, 0),
+       ('kakao456', 500000, 500000, 0, 0, 0);
+
+-- 초기 Holding Individual Stock 데이터
+-- INSERT INTO holding_individual_stock (stock_code, stock_name, average_purchase_price, current_price,
+--                                       quantity, valuation, yield, account_asset_id)
+-- VALUES ('095570', 'AJ네트웍스', 10000, 10500, 50, 525000, 5.0, 1), -- user1's holding
+--        ('006840', 'AK홀딩스', 20000, 21000, 20, 420000, 5.0, 1),  -- user1's holding
+--        ('027410', 'BGF', 15000, 15700, 30, 471000, 4.67, 2); -- user2's holding
