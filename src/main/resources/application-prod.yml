@@ -1,2 +1,12 @@
 server:
   port: 8080
+
+spring:
+  datasource:
+    url: ${prod-db.url}
+    username: ${prod-db.username}
+    password: ${prod-db.password}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    defer-datasource-initialization: false
