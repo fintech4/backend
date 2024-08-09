@@ -16,6 +16,8 @@ import com.Toou.Toou.usecase.StockOrderUseCase;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,6 +39,10 @@ public class AccountController {
 	private final StockOrderUseCase stockOrderUseCase;
 
 	private static final String DUMMY_STOCK_NAME = "더미종목명";
+
+	@Value("${dummy.newest-date}")
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	private LocalDate DUMMY_NEWEST_DATE;
 
 	@GetMapping("/assets")
 	ResponseEntity<AccountAssetResponse> asset(
@@ -75,7 +81,7 @@ public class AccountController {
 			@CookieValue(value = "kakaoId") String kakaoId,
 			@PathVariable String stockCode) {
 		AccountAsset accountAsset = getAccountAssetByKakaoId(kakaoId);
-		BuyableStockUseCase.Input input = new BuyableStockUseCase.Input(stockCode,
+		BuyableStockUseCase.Input input = new BuyableStockUseCase.Input(stockCode, DUMMY_NEWEST_DATE,
 				accountAsset);
 		BuyableStockUseCase.Output output = buyableStockUseCase.execute(input);
 		OrderableQuantityResponse response = OrderableQuantityResponse.fromDomainModel(
