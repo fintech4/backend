@@ -1,7 +1,6 @@
 package com.Toou.Toou.usecase;
 
 import com.Toou.Toou.domain.model.AccountAsset;
-import com.Toou.Toou.domain.model.UserAccount;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -13,7 +12,7 @@ public interface AccountAssetUseCase {
 	@Data
 	class Input {
 
-		UserAccount userAccount;
+		String kakaoId;
 	}
 
 	@AllArgsConstructor

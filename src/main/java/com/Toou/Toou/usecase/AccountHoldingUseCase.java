@@ -1,7 +1,7 @@
 package com.Toou.Toou.usecase;
 
+import com.Toou.Toou.domain.model.AccountAsset;
 import com.Toou.Toou.domain.model.HoldingIndividualStock;
-import com.Toou.Toou.domain.model.UserAccount;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,7 +14,7 @@ public interface AccountHoldingUseCase {
 	@Data
 	class Input {
 
-		UserAccount userAccount;
+		AccountAsset accountAsset;
 	}
 
 	@AllArgsConstructor

@@ -16,5 +16,5 @@ public class StockOrder {
 	private Long stockPrice;
 	private Long orderQuantity;
 	private TradeType tradeType;
-	private UserAccount userAccount;
+	private AccountAsset accountAsset;
 }
