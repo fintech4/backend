@@ -12,4 +12,5 @@ public class StockMetadata {
 	private Long id;
 	private String stockCode;
 	private String stockName;
+	private MarketType market;
 }

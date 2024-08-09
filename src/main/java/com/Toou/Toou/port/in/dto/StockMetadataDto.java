@@ -1,5 +1,6 @@
 package com.Toou.Toou.port.in.dto;
 
+import com.Toou.Toou.domain.model.MarketType;
 import com.Toou.Toou.domain.model.StockMetadata;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -15,10 +16,14 @@ public class StockMetadataDto {
 	@Schema(description = "종목명")
 	private String stockName;
 
+	@Schema(description = "시장")
+	private MarketType market;
+
 	public static StockMetadataDto fromDomainModel(StockMetadata domainModel) {
 		return new StockMetadataDto(
 				domainModel.getStockCode(),
-				domainModel.getStockName()
+				domainModel.getStockName(),
+				domainModel.getMarket()
 		);
 	}
 }
