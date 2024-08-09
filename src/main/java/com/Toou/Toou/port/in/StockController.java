@@ -1,6 +1,8 @@
 package com.Toou.Toou.port.in;
 
 import com.Toou.Toou.domain.model.StockDailyHistory;
+import com.Toou.Toou.exception.CustomException;
+import com.Toou.Toou.exception.CustomExceptionDetail;
 import com.Toou.Toou.port.in.dto.StockDailyHistoryDto;
 import com.Toou.Toou.port.in.dto.StockHistoryListResponse;
 import com.Toou.Toou.port.in.dto.StockMetadataDto;
@@ -78,11 +80,11 @@ public class StockController {
 	private static boolean isValidDateRange(LocalDate dateFrom, LocalDate dateTo) {
 		return dateFrom.isEqual(dateTo) || dateFrom.isBefore(dateTo);
 	}
-	
+
 	private static StockHistoryListResponse buildStockHistoryListResponse(
 			List<StockDailyHistory> stockDailyHistories, LocalDate newestDate) {
 		StockDailyHistory firstHistory = stockDailyHistories.stream().findFirst()
-				.orElseThrow(() -> new IllegalStateException("No stock history found"));
+				.orElseThrow(() -> new CustomException(CustomExceptionDetail.STOCK_NOT_FOUND));
 		StockDailyHistory lastHistory = stockDailyHistories.get(stockDailyHistories.size() - 1);
 
 		return new StockHistoryListResponse(
