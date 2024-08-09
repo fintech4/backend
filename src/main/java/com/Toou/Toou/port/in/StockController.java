@@ -13,6 +13,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,8 +30,13 @@ public class StockController {
 	private final ListStockMetadataUseCase listStockMetadataUseCase;
 	private final ListStockHistoryUseCase listStockHistoryUseCase;
 
-	private final LocalDate DUMMY_START_DATE = LocalDate.of(2023, 1, 1);
-	private final LocalDate DUMMY_NEWEST_DATE = LocalDate.of(2023, 12, 31);
+	@Value("${dummy.start-date}")
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	private LocalDate DUMMY_START_DATE;
+
+	@Value("${dummy.newest-date}")
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	private LocalDate DUMMY_NEWEST_DATE;
 
 	@GetMapping
 	ResponseEntity<StockSearchListResponse> listStockMetadataByName(@RequestParam final String name,
