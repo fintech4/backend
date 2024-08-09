@@ -19,7 +19,7 @@ public class CorsConfig {
 	public CorsConfig(
 			@Value("${front-prod-ip}") String frontProdIp,
 			@Value("${front-local-ip}") String frontLocalIp,
-			@Value(("${back-prod-ip}")) String backProdIp) {
+			@Value("${back-prod-ip}") String backProdIp) {
 		this.frontProdIp = frontProdIp;
 		this.frontLocalIp = frontLocalIp;
 		this.backProdIp = backProdIp;
