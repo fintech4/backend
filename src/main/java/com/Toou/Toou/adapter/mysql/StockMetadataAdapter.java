@@ -12,11 +12,11 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class StockMetadataAdapter implements StockMetadataPort {
 
-	private final StockMetadataRepository stockMetadataRepository;
+	private final StockMetadataJpaRepository stockMetadataJpaRepository;
 
 	@Override
 	public List<StockMetadata> searchStocksByStockName(String stockName, int limit) {
-		List<StockMetadataEntity> entities = stockMetadataRepository.findByStockNameContaining(
+		List<StockMetadataEntity> entities = stockMetadataJpaRepository.findByStockNameContaining(
 				stockName);
 		return entities.stream()
 				.map(this::toDomainModel)
