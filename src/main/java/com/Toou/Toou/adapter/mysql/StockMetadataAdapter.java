@@ -6,10 +6,9 @@ import com.Toou.Toou.port.out.StockMetadataPort;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
-//@Repository
-@Component
+@Repository
 @RequiredArgsConstructor
 public class StockMetadataAdapter implements StockMetadataPort {
 
