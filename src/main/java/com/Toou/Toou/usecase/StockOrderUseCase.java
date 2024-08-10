@@ -1,7 +1,7 @@
 package com.Toou.Toou.usecase;
 
-import com.Toou.Toou.domain.model.AccountAsset;
 import com.Toou.Toou.domain.model.StockOrder;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -14,7 +14,8 @@ public interface StockOrderUseCase {
 	class Input {
 
 		StockOrder stockOrder;
-		AccountAsset accountAsset;
+		LocalDate orderDate;
+		String kakaoId;
 	}
 
 	@AllArgsConstructor

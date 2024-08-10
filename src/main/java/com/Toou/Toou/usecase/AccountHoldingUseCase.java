@@ -1,6 +1,5 @@
 package com.Toou.Toou.usecase;
 
-import com.Toou.Toou.domain.model.AccountAsset;
 import com.Toou.Toou.domain.model.HoldingIndividualStock;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -14,7 +13,7 @@ public interface AccountHoldingUseCase {
 	@Data
 	class Input {
 
-		AccountAsset accountAsset;
+		String kakaoId;
 	}
 
 	@AllArgsConstructor

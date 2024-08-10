@@ -1,6 +1,13 @@
 package com.Toou.Toou.usecase;
 
+import com.Toou.Toou.domain.model.AccountAsset;
+import com.Toou.Toou.domain.model.HoldingIndividualStock;
+import com.Toou.Toou.domain.model.StockMetadata;
 import com.Toou.Toou.domain.model.StockSellable;
+import com.Toou.Toou.port.out.AccountAssetPort;
+import com.Toou.Toou.port.out.HoldingStockPort;
+import com.Toou.Toou.port.out.StockMetadataPort;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -8,12 +15,20 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class SellableStockService implements SellableStockUseCase {
 
-	private static final StockSellable stockSellable = new StockSellable(
-			1L, "A079980", "휴비스", 10L
-	);
+	private final AccountAssetPort accountAssetPort;
+	private final StockMetadataPort stockMetadataPort;
+	private final HoldingStockPort holdingStockPort;
 
 	@Override
 	public Output execute(Input input) {
+		AccountAsset accountAsset = accountAssetPort.findAssetByKakaoId(input.kakaoId);
+		Optional<HoldingIndividualStock> holdingIndividualStock = holdingStockPort.findHoldingByStockCodeAndAssetId(
+				input.stockCode, accountAsset.getId());
+		StockMetadata stockMetadata = stockMetadataPort.findStockByStockCode(input.stockCode);
+		Long sellableQuantity =
+				holdingIndividualStock.isPresent() ? holdingIndividualStock.get().getQuantity() : 0L;
+		StockSellable stockSellable = new StockSellable(
+				input.stockCode, stockMetadata.getStockName(), sellableQuantity);
 		return new Output(stockSellable);
 	}
 }

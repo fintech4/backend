@@ -22,14 +22,34 @@ public class AccountAssetAdapter implements AccountAssetPort {
 		return toDomainModel(entity);
 	}
 
+	@Override
+	public AccountAsset saveAsset(AccountAsset accountAsset) {
+		AccountAssetEntity entity = toEntity(accountAsset);
+		AccountAssetEntity savedEntity = accountAssetJpaRepository.save(entity);
+		return toDomainModel(savedEntity);
+	}
+
 	private AccountAsset toDomainModel(AccountAssetEntity entity) {
 		return new AccountAsset(
 				entity.getId(),
+				entity.getKakaoId(),
 				entity.getTotalAsset(),
 				entity.getDeposit(),
 				entity.getTotalHoldingsValue(),
 				entity.getTotalHoldingsQuantity(),
 				entity.getInvestmentYield()
+		);
+	}
+
+	private AccountAssetEntity toEntity(AccountAsset accountAsset) {
+		return new AccountAssetEntity(
+				accountAsset.getId(),
+				accountAsset.getKakaoId(),
+				accountAsset.getTotalAsset(),
+				accountAsset.getDeposit(),
+				accountAsset.getTotalHoldingsValue(),
+				accountAsset.getTotalHoldingsQuantity(),
+				accountAsset.getInvestmentYield()
 		);
 	}
 }

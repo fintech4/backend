@@ -1,6 +1,7 @@
 package com.Toou.Toou.port.in;
 
 import com.Toou.Toou.port.in.dto.VoidResponse;
+import com.Toou.Toou.usecase.AccountAssetUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,12 +17,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class AuthController {
 
+	private final AccountAssetUseCase accountAssetUseCase;
+
 	@GetMapping("/login/kakao")
 	@Operation(summary = "카카오 로그인 데모", description = "kakaoId로 더미 데이터인 kakao123, kakao456 를 입력하시면 돼요 ")
 //TODO: OAuth 완료 후 수정
 	public ResponseEntity<VoidResponse> loginWithKakao(@RequestParam String kakaoId,
 			HttpServletResponse response) {
-		// 예시: 여기서는 이미 Kakao 인증이 완료되었다고 가정하고, kakaoId를 쿠키에 저장
+		AccountAssetUseCase.Input input = new AccountAssetUseCase.Input(kakaoId);
+		AccountAssetUseCase.Output output = accountAssetUseCase.execute(input);
 		Cookie cookie = new Cookie("kakaoId", kakaoId);
 		cookie.setHttpOnly(true); // 보안 설정
 		cookie.setPath("/");

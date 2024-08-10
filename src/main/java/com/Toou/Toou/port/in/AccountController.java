@@ -53,8 +53,7 @@ public class AccountController {
 	@GetMapping("/holdings")
 	ResponseEntity<HoldingListResponse> holdingListStock(
 			@CookieValue(value = "kakaoId", required = true) String kakaoId) {
-		AccountAsset accountAsset = getAccountAssetByKakaoId(kakaoId);
-		AccountHoldingUseCase.Input input = new AccountHoldingUseCase.Input(accountAsset);
+		AccountHoldingUseCase.Input input = new AccountHoldingUseCase.Input(kakaoId);
 		AccountHoldingUseCase.Output output = accountHoldingUseCase.execute(input);
 		HoldingListResponse response = new HoldingListResponse(output.getHoldings().stream().map(
 				HoldingIndividualDto::fromDomainModel).toList());
@@ -67,7 +66,7 @@ public class AccountController {
 			@PathVariable String stockCode) {
 		AccountAsset accountAsset = getAccountAssetByKakaoId(kakaoId);
 		SellableStockUseCase.Input input = new SellableStockUseCase.Input(stockCode,
-				accountAsset);
+				kakaoId);
 		SellableStockUseCase.Output output = sellableStockUseCase.execute(input);
 		OrderableQuantityResponse response = OrderableQuantityResponse.fromDomainModel(
 				output.getStockSellable());
@@ -80,7 +79,7 @@ public class AccountController {
 			@PathVariable String stockCode) {
 		AccountAsset accountAsset = getAccountAssetByKakaoId(kakaoId);
 		BuyableStockUseCase.Input input = new BuyableStockUseCase.Input(stockCode, DUMMY_NEWEST_DATE,
-				accountAsset);
+				kakaoId);
 		BuyableStockUseCase.Output output = buyableStockUseCase.execute(input);
 		OrderableQuantityResponse response = OrderableQuantityResponse.fromDomainModel(
 				output.getStockBuyable());
@@ -101,7 +100,8 @@ public class AccountController {
 				.tradeType(request.getTradeType())
 				.accountAsset(accountAsset)
 				.build();
-		StockOrderUseCase.Input input = new StockOrderUseCase.Input(stockOrder, accountAsset);
+		StockOrderUseCase.Input input = new StockOrderUseCase.Input(stockOrder, DUMMY_NEWEST_DATE,
+				kakaoId);
 		StockOrderUseCase.Output output = stockOrderUseCase.execute(input);
 		VoidResponse response = new VoidResponse(true);
 		return ResponseEntity.ok().body(response);

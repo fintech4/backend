@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @Getter
 public class StockSellable {
 
-	private Long id;
 	private String stockCode;              // 종목 코드
 	private String stockName;              // 종목명
 	private Long sellableQuantity;
