@@ -2,6 +2,8 @@ package com.Toou.Toou.adapter.mysql;
 
 import com.Toou.Toou.adapter.mysql.entity.StockHistoryEntity;
 import com.Toou.Toou.domain.model.StockDailyHistory;
+import com.Toou.Toou.exception.CustomException;
+import com.Toou.Toou.exception.CustomExceptionDetail;
 import com.Toou.Toou.port.out.StockHistoryPort;
 import java.time.LocalDate;
 import java.util.List;
@@ -23,6 +25,14 @@ public class StockHistoryAdapter implements StockHistoryPort {
 		return entities.stream()
 				.map(this::toDomainModel)
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public StockDailyHistory findStockHistoryByDate(Long stockMetadataId, LocalDate date) {
+		StockHistoryEntity entity = stockHistoryJpaRepository.findFirstByStockMetadata_IdAndDate(
+				stockMetadataId, date).orElseThrow(
+				() -> new CustomException(CustomExceptionDetail.STOCK_HISTORY_NOT_FOUND));
+		return toDomainModel(entity);
 	}
 
 	private StockDailyHistory toDomainModel(StockHistoryEntity entity) {

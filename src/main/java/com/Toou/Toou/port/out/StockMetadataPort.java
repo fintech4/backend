@@ -6,4 +6,6 @@ import java.util.List;
 public interface StockMetadataPort {
 
 	List<StockMetadata> searchStocksByStockName(String stockName, int limit);
+
+	StockMetadata searchStockByStockCode(String stockCode);
 }

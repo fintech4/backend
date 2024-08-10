@@ -15,7 +15,7 @@ public class AccountHoldingService implements AccountHoldingUseCase {
 
 	@Transactional
 	@Override
-	public AccountHoldingUseCase.Output execute(AccountHoldingUseCase.Input input) {
+	public Output execute(AccountHoldingUseCase.Input input) {
 		List<HoldingIndividualStock> holdings = holdingStockPort.findAllHoldings(input.accountAsset);
 		return new Output(holdings);
 	}

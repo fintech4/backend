@@ -80,7 +80,7 @@ public class AccountController {
 			@PathVariable String stockCode) {
 		AccountAsset accountAsset = getAccountAssetByKakaoId(kakaoId);
 		BuyableStockUseCase.Input input = new BuyableStockUseCase.Input(stockCode, DUMMY_NEWEST_DATE,
-				accountAsset);
+				kakaoId);
 		BuyableStockUseCase.Output output = buyableStockUseCase.execute(input);
 		OrderableQuantityResponse response = OrderableQuantityResponse.fromDomainModel(
 				output.getStockBuyable());

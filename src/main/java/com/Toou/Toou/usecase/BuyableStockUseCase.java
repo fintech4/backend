@@ -1,6 +1,5 @@
 package com.Toou.Toou.usecase;
 
-import com.Toou.Toou.domain.model.AccountAsset;
 import com.Toou.Toou.domain.model.StockBuyable;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
@@ -16,7 +15,7 @@ public interface BuyableStockUseCase {
 
 		String stockCode;
 		LocalDate buyDate;
-		AccountAsset accountAsset;
+		String kakaoId;
 	}
 
 	@AllArgsConstructor

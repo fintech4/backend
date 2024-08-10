@@ -1,7 +1,6 @@
-package com.Toou.Toou.adapter.mysql.entity;
+package com.Toou.Toou.adapter.mysql;
 
-import com.Toou.Toou.adapter.mysql.AccountAssetJpaRepository;
-import com.Toou.Toou.adapter.mysql.HoldingStockJpaRepository;
+import com.Toou.Toou.adapter.mysql.entity.HoldingStockEntity;
 import com.Toou.Toou.domain.model.AccountAsset;
 import com.Toou.Toou.domain.model.HoldingIndividualStock;
 import com.Toou.Toou.port.out.HoldingStockPort;

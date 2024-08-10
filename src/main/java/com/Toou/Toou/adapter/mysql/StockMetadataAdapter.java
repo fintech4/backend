@@ -2,6 +2,8 @@ package com.Toou.Toou.adapter.mysql;
 
 import com.Toou.Toou.adapter.mysql.entity.StockMetadataEntity;
 import com.Toou.Toou.domain.model.StockMetadata;
+import com.Toou.Toou.exception.CustomException;
+import com.Toou.Toou.exception.CustomExceptionDetail;
 import com.Toou.Toou.port.out.StockMetadataPort;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +24,15 @@ public class StockMetadataAdapter implements StockMetadataPort {
 				.map(this::toDomainModel)
 				.limit(limit)
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public StockMetadata searchStockByStockCode(String stockCode) {
+		StockMetadataEntity stockMetadataEntity = stockMetadataJpaRepository.findByStockCode(stockCode)
+				.orElseThrow(() -> new CustomException(
+						CustomExceptionDetail.STOCK_NOT_FOUND));
+
+		return toDomainModel(stockMetadataEntity);
 	}
 
 	private StockMetadata toDomainModel(StockMetadataEntity entity) {

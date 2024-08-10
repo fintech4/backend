@@ -14,7 +14,7 @@ public class AccountAssetService implements AccountAssetUseCase {
 
 	@Transactional
 	@Override
-	public AccountAssetUseCase.Output execute(AccountAssetUseCase.Input input) {
+	public Output execute(AccountAssetUseCase.Input input) {
 		AccountAsset accountAsset = accountAssetPort.findAssetByKakaoId(input.kakaoId);
 		return new Output(accountAsset);
 	}
