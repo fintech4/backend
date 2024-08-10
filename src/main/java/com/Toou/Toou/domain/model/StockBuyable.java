@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @Getter
 public class StockBuyable {
 
-	private Long id;
 	private String stockCode;
 	private String stockName;
 	private Long stockPrice;

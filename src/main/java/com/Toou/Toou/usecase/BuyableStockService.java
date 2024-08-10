@@ -1,6 +1,7 @@
 package com.Toou.Toou.usecase;
 
 import com.Toou.Toou.domain.model.StockBuyable;
+import com.Toou.Toou.port.out.BuyableStockPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -8,12 +9,12 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class BuyableStockService implements BuyableStockUseCase {
 
-	private static final StockBuyable stockBuyable = new StockBuyable(
-			1L, "A079980", "휴비스", 5670L, 100000L, 10L
-	);
+	private final BuyableStockPort buyableStockPort;
 
 	@Override
 	public Output execute(Input input) {
+		StockBuyable stockBuyable = buyableStockPort.getStockBuyableByStockCode(input.stockCode,
+				input.buyDate, input.accountAsset);
 		return new Output(stockBuyable);
 	}
 }
