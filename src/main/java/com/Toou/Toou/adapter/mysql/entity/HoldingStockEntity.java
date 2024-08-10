@@ -1,15 +1,11 @@
 package com.Toou.Toou.adapter.mysql.entity;
 
 
-import com.Toou.Toou.domain.model.StockOrder;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -45,18 +41,6 @@ public class HoldingStockEntity {
 	@Column(name = "yield", nullable = false)
 	private Double yield;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "account_asset_id", nullable = false)
-	private AccountAssetEntity accountAsset;
-
-	public HoldingStockEntity(StockOrder stockOrder, AccountAssetEntity accountAssetEntity) {
-		this.stockCode = stockOrder.getStockCode();
-		this.stockName = stockOrder.getStockName();
-		this.averagePurchasePrice = stockOrder.getStockPrice();
-		this.currentPrice = stockOrder.getStockPrice();
-		this.quantity = stockOrder.getOrderQuantity();
-		this.valuation = stockOrder.getStockPrice() * stockOrder.getOrderQuantity();
-		this.yield = 0.0; // 초기 수익률은 0으로 설정
-		this.accountAsset = accountAssetEntity;
-	}
+	@Column(name = "account_asset_id", nullable = false)
+	private Long accountAssetId;
 }

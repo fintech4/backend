@@ -36,6 +36,18 @@ public class HoldingStockAdapter implements HoldingStockPort {
 		return Optional.of(toDomainModel(entity));
 	}
 
+	@Override
+	public HoldingIndividualStock save(HoldingIndividualStock holdingIndividualStock) {
+		HoldingStockEntity entity = toEntity(holdingIndividualStock);
+		HoldingStockEntity savedEntity = holdingStockJpaRepository.save(entity);
+		return toDomainModel(savedEntity);
+	}
+
+	@Override
+	public void delete(HoldingIndividualStock holdingIndividualStock) {
+		HoldingStockEntity entity = toEntity(holdingIndividualStock);
+		holdingStockJpaRepository.delete(entity);
+	}
 
 	private HoldingIndividualStock toDomainModel(HoldingStockEntity entity) {
 		return new HoldingIndividualStock(
@@ -46,7 +58,22 @@ public class HoldingStockAdapter implements HoldingStockPort {
 				entity.getCurrentPrice(),
 				entity.getQuantity(),
 				entity.getValuation(),
-				entity.getYield()
+				entity.getYield(),
+				entity.getAccountAssetId()
+		);
+	}
+
+	private HoldingStockEntity toEntity(HoldingIndividualStock holdingIndividualStock) {
+		return new HoldingStockEntity(
+				holdingIndividualStock.getId(),
+				holdingIndividualStock.getStockCode(),
+				holdingIndividualStock.getStockName(),
+				holdingIndividualStock.getAveragePurchasePrice(),
+				holdingIndividualStock.getCurrentPrice(),
+				holdingIndividualStock.getQuantity(),
+				holdingIndividualStock.getValuation(),
+				holdingIndividualStock.getYield(),
+				holdingIndividualStock.getAccountAssetId()
 		);
 	}
 }

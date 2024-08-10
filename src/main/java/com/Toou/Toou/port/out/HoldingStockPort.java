@@ -9,4 +9,8 @@ public interface HoldingStockPort {
 	List<HoldingIndividualStock> findAllHoldingsByAccountAssetId(Long accountAssetId);
 
 	Optional<HoldingIndividualStock> findHoldingByStockCodeAndAssetId(String StockCode, Long assetId);
+
+	HoldingIndividualStock save(HoldingIndividualStock holdingIndividualStock);
+
+	void delete(HoldingIndividualStock holdingIndividualStock);
 }

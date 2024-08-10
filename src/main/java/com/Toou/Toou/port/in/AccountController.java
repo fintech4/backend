@@ -100,7 +100,8 @@ public class AccountController {
 				.tradeType(request.getTradeType())
 				.accountAsset(accountAsset)
 				.build();
-		StockOrderUseCase.Input input = new StockOrderUseCase.Input(stockOrder, accountAsset);
+		StockOrderUseCase.Input input = new StockOrderUseCase.Input(stockOrder, DUMMY_NEWEST_DATE,
+				kakaoId);
 		StockOrderUseCase.Output output = stockOrderUseCase.execute(input);
 		VoidResponse response = new VoidResponse(true);
 		return ResponseEntity.ok().body(response);
