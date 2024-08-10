@@ -1,7 +1,7 @@
 package com.Toou.Toou.usecase;
 
+import com.Toou.Toou.domain.model.AccountAsset;
 import com.Toou.Toou.domain.model.StockSellable;
-import com.Toou.Toou.domain.model.UserAccount;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -14,7 +14,7 @@ public interface SellableStockUseCase {
 	class Input {
 
 		String stockCode;
-		UserAccount userAccount;
+		AccountAsset accountAsset;
 	}
 
 	@AllArgsConstructor
