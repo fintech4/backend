@@ -1,7 +1,6 @@
 package com.Toou.Toou.adapter.mysql;
 
 import com.Toou.Toou.adapter.mysql.entity.HoldingStockEntity;
-import com.Toou.Toou.domain.model.AccountAsset;
 import com.Toou.Toou.domain.model.HoldingIndividualStock;
 import com.Toou.Toou.port.out.HoldingStockPort;
 import java.util.List;
@@ -13,13 +12,12 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class HoldingStockAdapter implements HoldingStockPort {
 
-	private final AccountAssetJpaRepository accountAssetJpaRepository;
 	private final HoldingStockJpaRepository holdingStockJpaRepository;
 
 	@Override
-	public List<HoldingIndividualStock> findAllHoldings(AccountAsset accountAsset) {
+	public List<HoldingIndividualStock> findAllHoldingsByAccountAssetId(Long accountAssetId) {
 		List<HoldingStockEntity> holdingStockEntities = holdingStockJpaRepository.findByAccountAssetId(
-				accountAsset.getId());
+				accountAssetId);
 		return holdingStockEntities.stream()
 				.map(this::toDomainModel)
 				.collect(Collectors.toList());
