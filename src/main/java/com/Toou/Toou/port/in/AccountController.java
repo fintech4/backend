@@ -38,8 +38,6 @@ public class AccountController {
 	private final BuyableStockUseCase buyableStockUseCase;
 	private final StockOrderUseCase stockOrderUseCase;
 
-	private static final String DUMMY_STOCK_NAME = "더미종목명";
-
 	@Value("${dummy.newest-date}")
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private LocalDate DUMMY_NEWEST_DATE;
@@ -90,20 +88,20 @@ public class AccountController {
 	}
 
 	@PostMapping("/stocks/{stockCode}/order")
-	ResponseEntity<VoidResponse> buyStock(
+	ResponseEntity<VoidResponse> orderStock(
 			@CookieValue(value = "kakaoId") String kakaoId,
 			@Valid @RequestBody StockOrderRequest request,
 			@PathVariable String stockCode) {
 		AccountAsset accountAsset = getAccountAssetByKakaoId(kakaoId);
 		StockOrder stockOrder = StockOrder.builder()
 				.stockCode(stockCode)
-				.stockName(DUMMY_STOCK_NAME)
+				.stockName(request.getStockName())
 				.stockPrice(request.getStockPrice())
 				.orderQuantity(request.getOrderQuantity())
 				.tradeType(request.getTradeType())
 				.accountAsset(accountAsset)
 				.build();
-		StockOrderUseCase.Input input = new StockOrderUseCase.Input(stockOrder);
+		StockOrderUseCase.Input input = new StockOrderUseCase.Input(stockOrder, accountAsset);
 		StockOrderUseCase.Output output = stockOrderUseCase.execute(input);
 		VoidResponse response = new VoidResponse(true);
 		return ResponseEntity.ok().body(response);
