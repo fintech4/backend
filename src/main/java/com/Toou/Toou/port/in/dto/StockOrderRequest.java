@@ -10,6 +10,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class StockOrderRequest {
 
+	@Schema(description = "종목명")
+	@NotNull
+	private String stockName;
+
 	@Schema(description = "주식 가격")
 	@NotNull
 	private Long stockPrice;
