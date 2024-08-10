@@ -27,7 +27,7 @@ public class StockMetadataAdapter implements StockMetadataPort {
 	}
 
 	@Override
-	public StockMetadata searchStockByStockCode(String stockCode) {
+	public StockMetadata findStockByStockCode(String stockCode) {
 		StockMetadataEntity stockMetadataEntity = stockMetadataJpaRepository.findByStockCode(stockCode)
 				.orElseThrow(() -> new CustomException(
 						CustomExceptionDetail.STOCK_NOT_FOUND));

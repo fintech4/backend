@@ -66,7 +66,7 @@ public class AccountController {
 			@PathVariable String stockCode) {
 		AccountAsset accountAsset = getAccountAssetByKakaoId(kakaoId);
 		SellableStockUseCase.Input input = new SellableStockUseCase.Input(stockCode,
-				accountAsset);
+				kakaoId);
 		SellableStockUseCase.Output output = sellableStockUseCase.execute(input);
 		OrderableQuantityResponse response = OrderableQuantityResponse.fromDomainModel(
 				output.getStockSellable());
