@@ -54,7 +54,7 @@ public class StockOrderService implements StockOrderUseCase {
 		StockBuyable stockBuyable = getStockBuyable(accountAsset.getKakaoId(),
 				stockOrder.getStockCode(), orderDate);
 
-		if (stockBuyable.getBuyableQuantity() == 0) {
+		if (stockBuyable.getBuyableQuantity() < stockOrder.getOrderQuantity()) {
 			throw new CustomException(CustomExceptionDetail.WRONG_BUY_ORDER);
 		}
 
