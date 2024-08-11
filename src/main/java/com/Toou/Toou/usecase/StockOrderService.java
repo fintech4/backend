@@ -35,7 +35,7 @@ public class StockOrderService implements StockOrderUseCase {
 		StockDailyHistory stockDailyHistory = stockHistoryPort.findStockHistoryByDate(
 				stockMetadata.getId(), input.orderDate);
 		StockOrder stockOrder = new StockOrder(input.stockCode, stockMetadata.getStockName(),
-				stockDailyHistory.getPrices().get(3), input.orderQuantity, input.tradeType, accountAsset);
+				stockDailyHistory.getClosingPrice(), input.orderQuantity, input.tradeType, accountAsset);
 
 		if (input.tradeType == TradeType.BUY) {
 			handleBuyOrder(stockOrder, accountAsset, input.orderDate);
@@ -132,7 +132,7 @@ public class StockOrderService implements StockOrderUseCase {
 		StockMetadata stockMetadata = stockMetadataPort.findStockByStockCode(stockCode);
 		StockDailyHistory stockDailyHistory = stockHistoryPort.findStockHistoryByDate(
 				stockMetadata.getId(), buyDate);
-		Long closingPrice = stockDailyHistory.getPrices().get(3);
+		Long closingPrice = stockDailyHistory.getClosingPrice();
 		Long deposit = accountAsset.getDeposit();
 		Long buyableQuantity = deposit / closingPrice;
 		return new StockBuyable(stockCode, stockMetadata.getStockName(),

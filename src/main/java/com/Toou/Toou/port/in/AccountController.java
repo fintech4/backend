@@ -15,8 +15,6 @@ import com.Toou.Toou.usecase.StockOrderUseCase;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,10 +34,6 @@ public class AccountController {
 	private final SellableStockUseCase sellableStockUseCase;
 	private final BuyableStockUseCase buyableStockUseCase;
 	private final StockOrderUseCase stockOrderUseCase;
-
-	@Value("${dummy.newest-date}")
-	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	private LocalDate DUMMY_NEWEST_DATE;
 
 	@GetMapping("/assets")
 	ResponseEntity<AccountAssetResponse> asset(
@@ -77,7 +71,8 @@ public class AccountController {
 			@CookieValue(value = "kakaoId") String kakaoId,
 			@PathVariable String stockCode) {
 		AccountAsset accountAsset = getAccountAssetByKakaoId(kakaoId);
-		BuyableStockUseCase.Input input = new BuyableStockUseCase.Input(stockCode, DUMMY_NEWEST_DATE,
+		LocalDate todayDate = LocalDate.now();
+		BuyableStockUseCase.Input input = new BuyableStockUseCase.Input(stockCode, todayDate,
 				kakaoId);
 		BuyableStockUseCase.Output output = buyableStockUseCase.execute(input);
 		OrderableQuantityResponse response = OrderableQuantityResponse.fromDomainModel(
@@ -90,7 +85,8 @@ public class AccountController {
 			@CookieValue(value = "kakaoId") String kakaoId,
 			@Valid @RequestBody StockOrderRequest request,
 			@PathVariable String stockCode) {
-		StockOrderUseCase.Input input = new StockOrderUseCase.Input(stockCode, DUMMY_NEWEST_DATE,
+		LocalDate todayDate = LocalDate.now();
+		StockOrderUseCase.Input input = new StockOrderUseCase.Input(stockCode, todayDate,
 				kakaoId, request.getTradeType(), request.getOrderQuantity());
 		StockOrderUseCase.Output output = stockOrderUseCase.execute(input);
 		VoidResponse response = new VoidResponse(true);

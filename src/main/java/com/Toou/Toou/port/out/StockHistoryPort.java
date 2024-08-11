@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface StockHistoryPort {
 
-	List<StockDailyHistory> findAllHistoriesBetweenDates(String stockCode, LocalDate dateFrom,
+	List<StockDailyHistory> findAllHistoriesBetweenDates(Long stockMetadataId, LocalDate dateFrom,
 			LocalDate dateTo);
 
 	StockDailyHistory findStockHistoryByDate(Long stockMetadataId, LocalDate date);

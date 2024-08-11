@@ -1,8 +1,6 @@
 package com.Toou.Toou.adapter.mysql;
 
 import com.Toou.Toou.adapter.mysql.entity.StockHistoryEntity;
-import com.Toou.Toou.adapter.mysql.entity.StockMetadataEntity;
-import com.Toou.Toou.domain.model.MarketType;
 import com.Toou.Toou.domain.model.StockDailyHistory;
 import com.Toou.Toou.exception.CustomException;
 import com.Toou.Toou.exception.CustomExceptionDetail;
@@ -20,10 +18,10 @@ public class StockHistoryAdapter implements StockHistoryPort {
 	private final StockHistoryJpaRepository stockHistoryJpaRepository;
 
 	@Override
-	public List<StockDailyHistory> findAllHistoriesBetweenDates(String stockCode,
+	public List<StockDailyHistory> findAllHistoriesBetweenDates(Long stockMetadataId,
 			LocalDate dateFrom, LocalDate dateTo) {
-		List<StockHistoryEntity> entities = stockHistoryJpaRepository.findAllByStockMetadata_StockCodeAndDateBetween(
-				stockCode, dateFrom, dateTo);
+		List<StockHistoryEntity> entities = stockHistoryJpaRepository.findAllByStockMetadataIdAndDateBetween(
+				stockMetadataId, dateFrom, dateTo);
 		return entities.stream()
 				.map(this::toDomainModel)
 				.collect(Collectors.toList());
@@ -31,7 +29,8 @@ public class StockHistoryAdapter implements StockHistoryPort {
 
 	@Override
 	public StockDailyHistory findStockHistoryByDate(Long stockMetadataId, LocalDate date) {
-		StockHistoryEntity entity = stockHistoryJpaRepository.findFirstByStockMetadata_IdAndDate(
+		//해당 날짜 전의 최근 값으로 매수/매도
+		StockHistoryEntity entity = stockHistoryJpaRepository.findFirstByStockMetadataIdAndDate(
 				stockMetadataId, date).orElseThrow(
 				() -> new CustomException(CustomExceptionDetail.STOCK_HISTORY_NOT_FOUND));
 		return toDomainModel(entity);
@@ -44,33 +43,26 @@ public class StockHistoryAdapter implements StockHistoryPort {
 		return toDomainModel(savedEntity);
 	}
 
+
 	private StockDailyHistory toDomainModel(StockHistoryEntity entity) {
 		return new StockDailyHistory(
 				entity.getId(),
-				entity.getStockMetadata().getStockCode(),
-				entity.getStockMetadata().getStockName(),
-				entity.getStockMetadata().getMarket().getValue(),
-				List.of(entity.getOpenPrice(), entity.getHighPrice(), entity.getLowPrice(),
-						entity.getClosingPrice()),
+				entity.getStockMetadataId(),
+				entity.getOpenPrice(),
+				entity.getHighPrice(),
+				entity.getLowPrice(),
+				entity.getClosingPrice(),
 				entity.getDate()
 		);
 	}
 
 	private StockHistoryEntity toEntity(StockDailyHistory stockDailyHistory) {
-		// StockMetadataEntity가 이미 존재한다고 가정합니다.
-		StockMetadataEntity stockMetadata = new StockMetadataEntity();
-		stockMetadata.setStockCode(stockDailyHistory.getStockCode());
-		stockMetadata.setStockName(stockDailyHistory.getStockName());
-		stockMetadata.setMarket(MarketType.valueOf(stockDailyHistory.getMarket()));
-
-		List<Long> prices = stockDailyHistory.getPrices();
-
 		StockHistoryEntity entity = new StockHistoryEntity();
-		entity.setStockMetadata(stockMetadata);
-		entity.setOpenPrice(prices.get(0));
-		entity.setHighPrice(prices.get(1));
-		entity.setLowPrice(prices.get(2));
-		entity.setClosingPrice(prices.get(3));
+		entity.setStockMetadataId(stockDailyHistory.getStockMetadataId());
+		entity.setOpenPrice(stockDailyHistory.getOpenPrice());
+		entity.setHighPrice(stockDailyHistory.getHighPrice());
+		entity.setLowPrice(stockDailyHistory.getLowPrice());
+		entity.setClosingPrice(stockDailyHistory.getClosingPrice());
 		entity.setDate(stockDailyHistory.getDate());
 
 		return entity;

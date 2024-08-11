@@ -20,7 +20,12 @@ public class StockDailyHistoryDto {
 	public static StockDailyHistoryDto fromDomainModel(StockDailyHistory domainModel) {
 		return new StockDailyHistoryDto(
 				domainModel.getDate(),
-				domainModel.getPrices()
+				List.of(
+						domainModel.getOpenPrice(),
+						domainModel.getHighPrice(),
+						domainModel.getLowPrice(),
+						domainModel.getClosingPrice()
+				)
 		);
 	}
 }
