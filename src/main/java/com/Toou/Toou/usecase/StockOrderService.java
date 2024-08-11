@@ -85,11 +85,16 @@ public class StockOrderService implements StockOrderUseCase {
 			Long newQuantity = holdingIndividualStock.getQuantity() + stockOrder.getOrderQuantity();
 			Long newValuation = holdingIndividualStock.getValuation() + totalCost;
 			Long newAveragePurchasePrice = newValuation / newQuantity;
+			Double newYield =
+					((double) (newValuation - holdingIndividualStock.getAveragePurchasePrice())
+							/ holdingIndividualStock.getAveragePurchasePrice()) * 100;
 
 			holdingIndividualStock.setQuantity(newQuantity);
 			holdingIndividualStock.setAveragePurchasePrice(newAveragePurchasePrice);
 			holdingIndividualStock.setValuation(newValuation);
+			holdingIndividualStock.setYield(newYield);
 			holdingIndividualStock.setCurrentPrice(stockOrder.getStockPrice());
+
 			HoldingIndividualStock savedHoldingIndividualStock = holdingStockPort.save(
 					holdingIndividualStock);
 		}
@@ -121,11 +126,21 @@ public class StockOrderService implements StockOrderUseCase {
 		holdingIndividualStock.setQuantity(
 				holdingIndividualStock.getQuantity() - stockOrder.getOrderQuantity());
 		holdingIndividualStock.setValuation(holdingIndividualStock.getValuation() - totalSale);
+
 		if (holdingIndividualStock.getQuantity() == 0) {
 			holdingStockPort.delete(holdingIndividualStock);
 			accountAsset.setTotalHoldingsQuantity(accountAsset.getTotalHoldingsQuantity() - 1);
 			AccountAsset savedAccountAsset = accountAssetPort.saveAsset(accountAsset);
 		} else {
+			Long newQuantity = holdingIndividualStock.getQuantity() + stockOrder.getOrderQuantity();
+			Long newValuation = holdingIndividualStock.getValuation() - totalSale;
+			Long newAveragePurchasePrice = newValuation / newQuantity;
+			Double newYield =
+					((double) (newValuation - holdingIndividualStock.getAveragePurchasePrice())
+							/ holdingIndividualStock.getAveragePurchasePrice()) * 100;
+
+			holdingIndividualStock.setAveragePurchasePrice(newAveragePurchasePrice);
+			holdingIndividualStock.setYield(newYield);
 			holdingStockPort.save(holdingIndividualStock);
 			AccountAsset savedAccountAsset = accountAssetPort.saveAsset(accountAsset);
 		}
