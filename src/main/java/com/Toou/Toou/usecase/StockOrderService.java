@@ -86,8 +86,8 @@ public class StockOrderService implements StockOrderUseCase {
 			Long newValuation = holdingIndividualStock.getValuation() + totalCost;
 			Long newAveragePurchasePrice = newValuation / newQuantity;
 			Double newYield =
-					((double) (newValuation - holdingIndividualStock.getAveragePurchasePrice())
-							/ holdingIndividualStock.getAveragePurchasePrice()) * 100;
+					((double) (newValuation - newAveragePurchasePrice)
+							/ newAveragePurchasePrice) * 100;
 
 			holdingIndividualStock.setQuantity(newQuantity);
 			holdingIndividualStock.setAveragePurchasePrice(newAveragePurchasePrice);
@@ -136,8 +136,8 @@ public class StockOrderService implements StockOrderUseCase {
 			Long newValuation = holdingIndividualStock.getValuation() - totalSale;
 			Long newAveragePurchasePrice = newValuation / newQuantity;
 			Double newYield =
-					((double) (newValuation - holdingIndividualStock.getAveragePurchasePrice())
-							/ holdingIndividualStock.getAveragePurchasePrice()) * 100;
+					((double) (newValuation - newAveragePurchasePrice)
+							/ newAveragePurchasePrice) * 100;
 
 			holdingIndividualStock.setAveragePurchasePrice(newAveragePurchasePrice);
 			holdingIndividualStock.setYield(newYield);
