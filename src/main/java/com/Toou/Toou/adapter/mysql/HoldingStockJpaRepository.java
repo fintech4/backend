@@ -11,5 +11,4 @@ public interface HoldingStockJpaRepository extends JpaRepository<HoldingStockEnt
 
 	Optional<HoldingStockEntity> findByStockCodeAndAccountAssetId(String stockCode,
 			Long accountAssetId);
-
 }

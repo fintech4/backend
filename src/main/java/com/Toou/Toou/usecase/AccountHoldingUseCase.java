@@ -1,6 +1,7 @@
 package com.Toou.Toou.usecase;
 
 import com.Toou.Toou.domain.model.HoldingIndividualStock;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,6 +15,7 @@ public interface AccountHoldingUseCase {
 	class Input {
 
 		String kakaoId;
+		LocalDate todayDate;
 	}
 
 	@AllArgsConstructor

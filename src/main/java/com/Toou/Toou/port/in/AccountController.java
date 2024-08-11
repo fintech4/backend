@@ -55,7 +55,8 @@ public class AccountController {
 	@GetMapping("/holdings")
 	ResponseEntity<HoldingListResponse> holdingListStock(
 			@CookieValue(value = "kakaoId", required = true) String kakaoId) {
-		AccountHoldingUseCase.Input input = new AccountHoldingUseCase.Input(kakaoId);
+		LocalDate todayDate = getTodayDate();
+		AccountHoldingUseCase.Input input = new AccountHoldingUseCase.Input(kakaoId, todayDate);
 		AccountHoldingUseCase.Output output = accountHoldingUseCase.execute(input);
 		HoldingListResponse response = new HoldingListResponse(true, output.getHoldings().stream().map(
 				HoldingIndividualDto::fromDomainModel).toList());
