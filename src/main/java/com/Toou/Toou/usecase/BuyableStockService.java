@@ -24,7 +24,7 @@ public class BuyableStockService implements BuyableStockUseCase {
 		StockMetadata stockMetadata = stockMetadataPort.findStockByStockCode(input.stockCode);
 		StockDailyHistory stockDailyHistory = stockHistoryPort.findStockHistoryByDate(
 				stockMetadata.getId(), input.buyDate);
-		Long closingPrice = stockDailyHistory.getPrices().get(3);
+		Long closingPrice = stockDailyHistory.getClosingPrice();
 		Long deposit = accountAsset.getDeposit();
 		Long buyableQuantity = deposit / closingPrice;
 		StockBuyable stockBuyable = new StockBuyable(input.stockCode, stockMetadata.getStockName(),

@@ -4,6 +4,9 @@ import com.Toou.Toou.adapter.openapi.dto.StockDailyHistoryOpenApiDto;
 import com.Toou.Toou.adapter.openapi.dto.StockOpenApiResponse;
 import com.Toou.Toou.domain.model.StockDailyHistory;
 import com.Toou.Toou.port.out.StockOpenApiPort;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -30,52 +33,70 @@ public class StockOpenApiAdapter implements StockOpenApiPort {
 	private String serviceKey;
 
 	@Override
-	public List<StockDailyHistory> findAllHistoriesBetweenDates(String companyName,
+	public List<StockDailyHistory> findAllHistoriesBetweenDates(Long stockMetadataId,
+			String companyName,
 			LocalDate dateFrom, LocalDate dateTo) {
 
-		// WebClient 생성
 		WebClient webClient = webClientBuilder
 				.baseUrl(baseUrl)
 				.build();
 
 		final List<StockDailyHistory> allHistories = new ArrayList<>();
 		int pageNo = 1;
-		int numOfRows = 100; // 한 페이지에 요청할 데이터 수
+		int numOfRows = 100;
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+		String formattedFromDate = dateFrom.format(formatter);
+		String formattedToDate = dateTo.format(formatter);
 
 		try {
 			while (true) {
-				int currentPage = pageNo; // final로 처리된 변수 사용
+				URI uri = new URI(baseUrl + "?serviceKey=" + serviceKey
+						+ "&resultType=json"
+						+ "&numOfRows=" + numOfRows
+						+ "&pageNo=" + pageNo
+						+ "&beginBasDt=" + formattedFromDate
+						+ "&endBasDt=" + formattedToDate
+						+ "&itmsNm=" + URLEncoder.encode(companyName, StandardCharsets.UTF_8.toString()));
+
+				System.out.println("Request URI: " + uri);
+
 				StockOpenApiResponse response = webClient.get()
-						.uri(uriBuilder -> uriBuilder
-								.queryParam("serviceKey", serviceKey)
-								.queryParam("resultType", "json")
-								.queryParam("numOfRows", numOfRows)
-								.queryParam("pageNo", currentPage)
-								.queryParam("beginBasDt", dateFrom.toString())
-								.queryParam("itmsNm", companyName)
-								.build())
-						.header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE) // JSON 응답 요청
+						.uri(uri)
+						.header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
 						.retrieve()
 						.bodyToMono(StockOpenApiResponse.class)
-						.block(); // 동기적으로 데이터를 블로킹하여 반환
+						.block();
 
-				if (response == null || response.getBody() == null) {
-					break; // 응답이 null이면 루프를 종료
+				if (response == null || response.getResponse() == null
+						|| response.getResponse().getBody() == null) {
+					System.out.println("No data in response, response body is null.");
+					break;
 				}
 
-				List<StockDailyHistoryOpenApiDto> items = response.getBody().getItems().getItem();
-				allHistories.addAll(items.stream()
-						.map(this::convertToDomain)
-						.collect(Collectors.toList()));
+				List<StockDailyHistoryOpenApiDto> items = response.getResponse().getBody().getItems()
+						.getItem();
+				if (items == null || items.isEmpty()) {
+					System.out.println("No items found in response.");
+					break;
+				}
 
-				int totalCount = response.getBody().getTotalCount();
+				List<StockDailyHistory> newHistories = items.stream()
+						.map(dto -> convertToDomain(dto, stockMetadataId))
+						.collect(Collectors.toList());
+
+				allHistories.addAll(newHistories);
+
+				System.out.println("Current allHistories: ");
+				newHistories.forEach(System.out::println);
+
+				int totalCount = response.getResponse().getBody().getTotalCount();
 				int totalPages = (int) Math.ceil((double) totalCount / numOfRows);
 
 				if (pageNo >= totalPages) {
-					break; // 모든 페이지를 다 읽으면 루프를 종료
+					break;
 				}
 
-				pageNo++; // 다음 페이지로 이동
+				pageNo++;
 			}
 
 		} catch (Exception e) {
@@ -85,21 +106,15 @@ public class StockOpenApiAdapter implements StockOpenApiPort {
 		return allHistories;
 	}
 
-
-	// DTO를 도메인 모델로 변환하는 메서드
-	private StockDailyHistory convertToDomain(StockDailyHistoryOpenApiDto dto) {
+	private StockDailyHistory convertToDomain(StockDailyHistoryOpenApiDto dto, Long stockMetadataId) {
 		return new StockDailyHistory(
 				null, // id는 DB에 저장할 때 자동 생성되므로 null로 설정
-				dto.getSrtnCd(),
-				dto.getItmsNm(),
-				dto.getMrktCtg(),
-				List.of(
-						Long.parseLong(dto.getMkp()),
-						Long.parseLong(dto.getHipr()),
-						Long.parseLong(dto.getLopr()),
-						Long.parseLong(dto.getClpr())
-				),
-				LocalDate.parse(dto.getBasDt(), DateTimeFormatter.BASIC_ISO_DATE)
+				stockMetadataId, // stockMetadataId를 외부에서 전달받아 사용
+				Long.parseLong(dto.getMkp()), // openPrice
+				Long.parseLong(dto.getHipr()), // highPrice
+				Long.parseLong(dto.getLopr()), // lowPrice
+				Long.parseLong(dto.getClpr()), // closingPrice
+				LocalDate.parse(dto.getBasDt(), DateTimeFormatter.BASIC_ISO_DATE) // date
 		);
 	}
 }

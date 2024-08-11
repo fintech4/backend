@@ -1,13 +1,17 @@
 package com.Toou.Toou.usecase;
 
 import com.Toou.Toou.domain.model.StockDailyHistory;
+import com.Toou.Toou.domain.model.StockMetadata;
 import com.Toou.Toou.port.out.StockHistoryPort;
+import com.Toou.Toou.port.out.StockMetadataPort;
 import com.Toou.Toou.port.out.StockOpenApiPort;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,25 +19,30 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ListStockHistoryService implements ListStockHistoryUseCase {
 
+	private static final Logger log = LoggerFactory.getLogger(ListStockHistoryService.class);
 	private final StockHistoryPort stockHistoryPort;
 	private final StockOpenApiPort stockOpenApiPort;
+	private final StockMetadataPort stockMetadataPort;
 
 	@Transactional
 	@Override
 	public Output execute(Input input) {
+		StockMetadata stockMetadata = stockMetadataPort.findStockByStockCode(input.stockCode);
 		List<StockDailyHistory> dailyHistories = stockHistoryPort.findAllHistoriesBetweenDates(
-				input.stockCode, input.dateFrom, input.dateTo);
+				stockMetadata.getId(), input.dateFrom, input.dateTo);
 
 		LocalDate lastDate = dailyHistories.stream()
 				.map(StockDailyHistory::getDate)
 				.max(LocalDate::compareTo)
 				.orElse(input.dateFrom);
 
-		// 3. 만약 마지막 날짜가 dateTo보다 이전이라면 오픈 API에서 데이터를 가져옴
 		if (lastDate.isBefore(input.dateTo)) {
 			// lastDate의 다음 날부터 dateTo까지의 데이터를 오픈 API에서 가져옴
+			log.info("시작일 {}, 끝나는일 {}", lastDate.plusDays(1), input.dateTo);
 			List<StockDailyHistory> externalHistories = stockOpenApiPort.findAllHistoriesBetweenDates(
-					input.stockCode, lastDate.plusDays(1), input.dateTo);
+					stockMetadata.getId(),
+					stockMetadata.getStockName(), lastDate.plusDays(1), input.dateTo);
+			log.info(externalHistories.toString());
 
 			// 4. 가져온 데이터가 비어 있지 않으면 리스트에 추가하고 데이터베이스에도 저장
 			if (!externalHistories.isEmpty()) {
