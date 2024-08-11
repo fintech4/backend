@@ -15,6 +15,8 @@ import com.Toou.Toou.usecase.StockOrderUseCase;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +36,13 @@ public class AccountController {
 	private final SellableStockUseCase sellableStockUseCase;
 	private final BuyableStockUseCase buyableStockUseCase;
 	private final StockOrderUseCase stockOrderUseCase;
+
+	@Value("${demo}")
+	boolean isDemo;
+
+	@Value("${time-machine}")
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	private LocalDate timeMachineEndDate;
 
 	@GetMapping("/assets")
 	ResponseEntity<AccountAssetResponse> asset(
@@ -71,7 +80,7 @@ public class AccountController {
 			@CookieValue(value = "kakaoId") String kakaoId,
 			@PathVariable String stockCode) {
 		AccountAsset accountAsset = getAccountAssetByKakaoId(kakaoId);
-		LocalDate todayDate = LocalDate.now();
+		LocalDate todayDate = getTodayDate();
 		BuyableStockUseCase.Input input = new BuyableStockUseCase.Input(stockCode, todayDate,
 				kakaoId);
 		BuyableStockUseCase.Output output = buyableStockUseCase.execute(input);
@@ -85,7 +94,7 @@ public class AccountController {
 			@CookieValue(value = "kakaoId") String kakaoId,
 			@Valid @RequestBody StockOrderRequest request,
 			@PathVariable String stockCode) {
-		LocalDate todayDate = LocalDate.now();
+		LocalDate todayDate = getTodayDate();
 		StockOrderUseCase.Input input = new StockOrderUseCase.Input(stockCode, todayDate,
 				kakaoId, request.getTradeType(), request.getOrderQuantity());
 		StockOrderUseCase.Output output = stockOrderUseCase.execute(input);
@@ -101,5 +110,9 @@ public class AccountController {
 		AccountAssetUseCase.Input input = new AccountAssetUseCase.Input(kakaoId);
 		AccountAssetUseCase.Output output = accountAssetUseCase.execute(input);
 		return output.getAccountAsset();
+	}
+
+	private LocalDate getTodayDate() {
+		return isDemo ? timeMachineEndDate : LocalDate.now();
 	}
 }

@@ -35,6 +35,13 @@ public class StockController {
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private LocalDate DUMMY_START_DATE;
 
+	@Value("${demo}")
+	boolean isDemo;
+
+	@Value("${time-machine}")
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	private LocalDate timeMachineEndDate;
+
 
 	@GetMapping
 	ResponseEntity<StockSearchListResponse> listStockMetadataByName(@RequestParam final String name,
@@ -59,7 +66,7 @@ public class StockController {
 			@RequestParam(value = "dateFrom", required = false) LocalDate dateFrom, // "yyyy-MM-dd"
 			@RequestParam(value = "dateTo", required = false) LocalDate dateTo // "yyyy-MM-dd"
 	) {
-		LocalDate todayDate = LocalDate.now();
+		LocalDate todayDate = getTodayDate();
 		dateFrom = dateFrom == null ? DUMMY_START_DATE : dateFrom;
 		dateTo = dateTo == null ? todayDate : dateTo;
 
@@ -108,5 +115,9 @@ public class StockController {
 						.map(StockDailyHistoryDto::fromDomainModel)
 						.toList()
 		);
+	}
+
+	private LocalDate getTodayDate() {
+		return isDemo ? timeMachineEndDate : LocalDate.now();
 	}
 }
