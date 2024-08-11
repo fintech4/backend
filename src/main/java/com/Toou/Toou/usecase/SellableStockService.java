@@ -7,7 +7,6 @@ import com.Toou.Toou.domain.model.StockSellable;
 import com.Toou.Toou.port.out.AccountAssetPort;
 import com.Toou.Toou.port.out.HoldingStockPort;
 import com.Toou.Toou.port.out.StockMetadataPort;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,11 +21,11 @@ public class SellableStockService implements SellableStockUseCase {
 	@Override
 	public Output execute(Input input) {
 		AccountAsset accountAsset = accountAssetPort.findAssetByKakaoId(input.kakaoId);
-		Optional<HoldingIndividualStock> holdingIndividualStock = holdingStockPort.findHoldingByStockCodeAndAssetId(
+		HoldingIndividualStock holdingIndividualStock = holdingStockPort.findHoldingByStockCodeAndAssetId(
 				input.stockCode, accountAsset.getId());
 		StockMetadata stockMetadata = stockMetadataPort.findStockByStockCode(input.stockCode);
 		Long sellableQuantity =
-				holdingIndividualStock.isPresent() ? holdingIndividualStock.get().getQuantity() : 0L;
+				holdingIndividualStock != null ? holdingIndividualStock.getQuantity() : 0L;
 		StockSellable stockSellable = new StockSellable(
 				input.stockCode, stockMetadata.getStockName(), sellableQuantity);
 		return new Output(stockSellable);

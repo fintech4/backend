@@ -2,11 +2,8 @@ package com.Toou.Toou.adapter.mysql;
 
 import com.Toou.Toou.adapter.mysql.entity.HoldingStockEntity;
 import com.Toou.Toou.domain.model.HoldingIndividualStock;
-import com.Toou.Toou.exception.CustomException;
-import com.Toou.Toou.exception.CustomExceptionDetail;
 import com.Toou.Toou.port.out.HoldingStockPort;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -27,13 +24,11 @@ public class HoldingStockAdapter implements HoldingStockPort {
 	}
 
 	@Override
-	public Optional<HoldingIndividualStock> findHoldingByStockCodeAndAssetId(String StockCode,
+	public HoldingIndividualStock findHoldingByStockCodeAndAssetId(String StockCode,
 			Long assetId) {
 		HoldingStockEntity entity = holdingStockJpaRepository.findByStockCodeAndAccountAssetId(
-				StockCode, assetId).orElseThrow(
-				() -> new CustomException(CustomExceptionDetail.NO_HOLDING_STOCK)
-		);
-		return Optional.of(toDomainModel(entity));
+				StockCode, assetId).orElse(null);
+		return entity == null ? null : toDomainModel(entity);
 	}
 
 	@Override

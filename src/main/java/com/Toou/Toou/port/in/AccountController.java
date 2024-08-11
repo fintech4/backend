@@ -1,7 +1,6 @@
 package com.Toou.Toou.port.in;
 
 import com.Toou.Toou.domain.model.AccountAsset;
-import com.Toou.Toou.domain.model.StockOrder;
 import com.Toou.Toou.port.in.dto.AccountAssetResponse;
 import com.Toou.Toou.port.in.dto.HoldingIndividualDto;
 import com.Toou.Toou.port.in.dto.HoldingListResponse;
@@ -91,17 +90,8 @@ public class AccountController {
 			@CookieValue(value = "kakaoId") String kakaoId,
 			@Valid @RequestBody StockOrderRequest request,
 			@PathVariable String stockCode) {
-		AccountAsset accountAsset = getAccountAssetByKakaoId(kakaoId);
-		StockOrder stockOrder = StockOrder.builder()
-				.stockCode(stockCode)
-				.stockName(request.getStockName())
-				.stockPrice(request.getStockPrice())
-				.orderQuantity(request.getOrderQuantity())
-				.tradeType(request.getTradeType())
-				.accountAsset(accountAsset)
-				.build();
-		StockOrderUseCase.Input input = new StockOrderUseCase.Input(stockOrder, DUMMY_NEWEST_DATE,
-				kakaoId);
+		StockOrderUseCase.Input input = new StockOrderUseCase.Input(stockCode, DUMMY_NEWEST_DATE,
+				kakaoId, request.getTradeType(), request.getOrderQuantity());
 		StockOrderUseCase.Output output = stockOrderUseCase.execute(input);
 		VoidResponse response = new VoidResponse(true);
 		return ResponseEntity.ok().body(response);
