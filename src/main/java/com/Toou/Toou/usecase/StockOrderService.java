@@ -55,7 +55,7 @@ public class StockOrderService implements StockOrderUseCase {
 				stockOrder.getStockCode(), orderDate);
 
 		if (stockBuyable.getBuyableQuantity() == 0) {
-			new CustomException(CustomExceptionDetail.WRONG_BUY_ORDER);
+			throw new CustomException(CustomExceptionDetail.WRONG_BUY_ORDER);
 		}
 
 		// 주문 금액 계산 및 deposit 감소
@@ -94,14 +94,15 @@ public class StockOrderService implements StockOrderUseCase {
 		HoldingIndividualStock holdingIndividualStock = holdingStockPort.findHoldingByStockCodeAndAssetId(
 				stockOrder.getStockCode(), accountAsset.getId());
 
+		if (holdingIndividualStock == null) {
+			throw new CustomException(CustomExceptionDetail.NO_HOLDING_STOCK);
+		}
+
 		StockSellable stockSellable = getStockSellable(accountAsset.getKakaoId(),
 				stockOrder.getStockCode(), orderDate);
 
-		if (stockSellable.getSellableQuantity() == 0) {
-			new CustomException(CustomExceptionDetail.NO_HOLDING_STOCK);
-		}
 		if (stockOrder.getOrderQuantity() > stockSellable.getSellableQuantity()) {
-			new CustomException(CustomExceptionDetail.WRONG_SELL_QUANTITY);
+			throw new CustomException(CustomExceptionDetail.WRONG_SELL_QUANTITY);
 		}
 
 		// 판매 금액 계산 및 deposit 증가
