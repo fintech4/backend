@@ -34,7 +34,15 @@ public class HoldingIndividualDto {
 				domainModel.getCurrentPrice(),
 				domainModel.getQuantity(),
 				domainModel.getValuation(),
-				domainModel.getYield()
+				roundYieldToTwoDecimalPlaces(domainModel.getYield())
 		);
+	}
+
+	private static Double roundYieldToTwoDecimalPlaces(Double yield) {
+		if (yield == null) {
+			return null;
+		}
+		// 소수점 둘째 자리에서 반올림
+		return Math.round(yield * 100) / 100.0;
 	}
 }
