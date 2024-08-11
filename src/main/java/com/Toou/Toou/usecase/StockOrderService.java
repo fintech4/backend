@@ -35,9 +35,6 @@ public class StockOrderService implements StockOrderUseCase {
 		if (stockMetadata == null) {
 			throw new CustomException(CustomExceptionDetail.STOCK_NOT_FOUND);
 		}
-		System.out.println("종목 코드 : " + stockMetadata.getStockCode());
-		System.out.println("종목 명 : " + stockMetadata.getStockName());
-
 		StockDailyHistory stockDailyHistory = stockHistoryPort.findStockHistoryByDate(
 				stockMetadata.getId(), input.orderDate);
 		if (stockDailyHistory == null) {
@@ -72,18 +69,18 @@ public class StockOrderService implements StockOrderUseCase {
 
 		//총 자산 변경
 		accountAsset.setDeposit(accountAsset.getDeposit() - totalCost);
-		accountAsset.setTotalHoldingsQuantity(
-				accountAsset.getTotalHoldingsQuantity() + stockOrder.getOrderQuantity());
-		AccountAsset savedAccountAsset = accountAssetPort.saveAsset(accountAsset);
 
 		// 보유 주식이 없다면 새로 추가
 		if (holdingIndividualStock == null) {
+			accountAsset.setTotalHoldingsQuantity(accountAsset.getTotalHoldingsQuantity() + 1);
+			AccountAsset savedAccountAsset = accountAssetPort.saveAsset(accountAsset);
 			HoldingIndividualStock newHoldingIndividualStock = new HoldingIndividualStock(stockOrder,
 					savedAccountAsset.getId());
 			HoldingIndividualStock savedHoldingIndividualStock = holdingStockPort.save(
 					newHoldingIndividualStock);
 		} else {
 			// 이미 보유한 주식이라면 수량과 평균 매입가, 평가 금액 업데이트
+			AccountAsset savedAccountAsset = accountAssetPort.saveAsset(accountAsset);
 			Long newQuantity = holdingIndividualStock.getQuantity() + stockOrder.getOrderQuantity();
 			Long newValuation = holdingIndividualStock.getValuation() + totalCost;
 			Long newAveragePurchasePrice = newValuation / newQuantity;
@@ -117,9 +114,6 @@ public class StockOrderService implements StockOrderUseCase {
 		// 판매 금액 계산 및 deposit 증가
 		Long totalSale = calculateTotalCost(stockOrder);
 		accountAsset.setDeposit(accountAsset.getDeposit() + totalSale);
-		accountAsset.setTotalHoldingsQuantity(
-				accountAsset.getTotalHoldingsQuantity() - stockOrder.getOrderQuantity());
-		AccountAsset savedAccountAsset = accountAssetPort.saveAsset(accountAsset);
 
 		// 주식 수량 및 평가 금액 업데이트
 		holdingIndividualStock.setQuantity(
@@ -127,8 +121,11 @@ public class StockOrderService implements StockOrderUseCase {
 		holdingIndividualStock.setValuation(holdingIndividualStock.getValuation() - totalSale);
 		if (holdingIndividualStock.getQuantity() == 0) {
 			holdingStockPort.delete(holdingIndividualStock);
+			accountAsset.setTotalHoldingsQuantity(accountAsset.getTotalHoldingsQuantity() - 1);
+			AccountAsset savedAccountAsset = accountAssetPort.saveAsset(accountAsset);
 		} else {
 			holdingStockPort.save(holdingIndividualStock);
+			AccountAsset savedAccountAsset = accountAssetPort.saveAsset(accountAsset);
 		}
 	}
 

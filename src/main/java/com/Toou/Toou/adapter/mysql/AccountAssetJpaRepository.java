@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface AccountAssetJpaRepository extends JpaRepository<AccountAssetEntity, Long> {
 
 	Optional<AccountAssetEntity> findByKakaoId(String kakaoId);
-	
+
 }
