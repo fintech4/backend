@@ -2,8 +2,6 @@ package com.Toou.Toou.adapter.mysql;
 
 import com.Toou.Toou.adapter.mysql.entity.StockHistoryEntity;
 import com.Toou.Toou.domain.model.StockDailyHistory;
-import com.Toou.Toou.exception.CustomException;
-import com.Toou.Toou.exception.CustomExceptionDetail;
 import com.Toou.Toou.port.out.StockHistoryPort;
 import java.time.LocalDate;
 import java.util.List;
@@ -30,10 +28,9 @@ public class StockHistoryAdapter implements StockHistoryPort {
 	@Override
 	public StockDailyHistory findStockHistoryByDate(Long stockMetadataId, LocalDate date) {
 		//해당 날짜 전의 최근 값으로 매수/매도
-		StockHistoryEntity entity = stockHistoryJpaRepository.findFirstByStockMetadataIdAndDate(
-				stockMetadataId, date).orElseThrow(
-				() -> new CustomException(CustomExceptionDetail.STOCK_HISTORY_NOT_FOUND));
-		return toDomainModel(entity);
+		StockHistoryEntity entity = stockHistoryJpaRepository.findFirstByStockMetadataIdAndDateLessThanEqualOrderByDateDesc(
+				stockMetadataId, date);
+		return entity == null ? null : toDomainModel(entity);
 	}
 
 	@Override

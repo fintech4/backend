@@ -20,14 +20,6 @@ public class StockHistoryEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-//	private String stockCode;
-//	private String stockName;
-//	private Long openPrice;
-//	private Long highPrice;
-//	private Long lowPrice;
-//	private Long closingPrice;
-//	private LocalDate date; // 해당 날짜
-
 	@Column(name = "stock_metadata_id", nullable = false)
 	private Long stockMetadataId;
 

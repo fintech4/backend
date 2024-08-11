@@ -32,8 +32,17 @@ public class StockOrderService implements StockOrderUseCase {
 	public Output execute(Input input) {
 		AccountAsset accountAsset = accountAssetPort.findAssetByKakaoId(input.kakaoId);
 		StockMetadata stockMetadata = stockMetadataPort.findStockByStockCode(input.stockCode);
+		if (stockMetadata == null) {
+			throw new CustomException(CustomExceptionDetail.STOCK_NOT_FOUND);
+		}
+		System.out.println("종목 코드 : " + stockMetadata.getStockCode());
+		System.out.println("종목 명 : " + stockMetadata.getStockName());
+
 		StockDailyHistory stockDailyHistory = stockHistoryPort.findStockHistoryByDate(
 				stockMetadata.getId(), input.orderDate);
+		if (stockDailyHistory == null) {
+			throw new CustomException(CustomExceptionDetail.STOCK_HISTORY_NOT_FOUND);
+		}
 		StockOrder stockOrder = new StockOrder(input.stockCode, stockMetadata.getStockName(),
 				stockDailyHistory.getClosingPrice(), input.orderQuantity, input.tradeType, accountAsset);
 
