@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface StockOpenApiPort {
 
-    List<StockDailyHistory> findAllHistoriesBetweenDates(String companyCode, LocalDate dateFrom, LocalDate dateTo);
+	List<StockDailyHistory> findAllHistoriesBetweenDates(String companyName, LocalDate dateFrom,
+			LocalDate dateTo);
 }

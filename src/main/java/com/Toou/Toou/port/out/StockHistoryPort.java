@@ -11,4 +11,6 @@ public interface StockHistoryPort {
 			LocalDate dateTo);
 
 	StockDailyHistory findStockHistoryByDate(Long stockMetadataId, LocalDate date);
+
+	StockDailyHistory save(StockDailyHistory stockDailyHistory);
 }
