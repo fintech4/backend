@@ -26,6 +26,7 @@ public interface ListStockHistoryUseCase {
 	class Output {
 
 		List<StockDailyHistory> dailyHistories;
+		String stockCode;
 		String stockName;
 		MarketType marketType;
 	}

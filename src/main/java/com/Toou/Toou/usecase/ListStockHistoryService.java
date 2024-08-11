@@ -53,7 +53,8 @@ public class ListStockHistoryService implements ListStockHistoryUseCase {
 						.collect(Collectors.toList());
 			}
 		}
-		return new Output(dailyHistories, stockMetadata.getStockName(), stockMetadata.getMarket());
+		return new Output(dailyHistories, stockMetadata.getStockCode(), stockMetadata.getStockName(),
+				stockMetadata.getMarket());
 	}
 //
 //	private boolean hasAllHistoriesBetweenDates(List<StockDailyHistory> histories, LocalDate dateFrom,

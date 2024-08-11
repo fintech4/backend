@@ -75,7 +75,7 @@ public class StockController {
 		ListStockHistoryUseCase.Output output = listStockHistoryUseCase.execute(input);
 		List<StockDailyHistory> stockDailyHistories = output.getDailyHistories();
 		StockHistoryListResponse response = buildStockHistoryListResponse(stockDailyHistories,
-				todayDate, output.getStockName(), output.getMarketType());
+				todayDate, output.getStockCode(), output.getStockName(), output.getMarketType());
 		return ResponseEntity.ok().body(response);
 	}
 
@@ -88,7 +88,8 @@ public class StockController {
 	}
 
 	private static StockHistoryListResponse buildStockHistoryListResponse(
-			List<StockDailyHistory> stockDailyHistories, LocalDate newestDate, String stockName,
+			List<StockDailyHistory> stockDailyHistories, LocalDate newestDate, String stockCode,
+			String stockName,
 			MarketType marketType) {
 		StockDailyHistory firstHistory = stockDailyHistories.stream().findFirst()
 				.orElseThrow(() -> new CustomException(CustomExceptionDetail.STOCK_NOT_FOUND));
@@ -97,7 +98,7 @@ public class StockController {
 		return new StockHistoryListResponse(
 				true,
 				firstHistory.getId(),
-				firstHistory.getStockMetadataId().toString(),
+				stockCode,
 				// stockMetadataId가 아닌 stockCode 사용을 고려하여 수정 필요
 				stockName,  // stockName도 마찬가지
 				marketType.toString(),  // 시장 정보를 가져오는 로직이 필요
