@@ -28,6 +28,9 @@ public class AccountHoldingService implements AccountHoldingUseCase {
 		AccountAsset accountAsset = accountAssetPort.findAssetByKakaoId(input.kakaoId);
 		List<HoldingIndividualStock> holdings = holdingStockPort.findAllHoldingsByAccountAssetId(
 				accountAsset.getId());
+		
+		Long totalHoldingsValue = 0L;
+		Long totalInitialInvestment = 0L;  // 주식들 평균 매수금액 * 보유 수량의 합
 
 		for (HoldingIndividualStock holding : holdings) {
 			StockMetadata stockMetadata = stockMetadataPort.findStockByStockCode(holding.getStockCode());
@@ -40,6 +43,10 @@ public class AccountHoldingService implements AccountHoldingUseCase {
 			// 평가 금액 = 현재 가격 * 보유 주식 수
 			Long newValuation = newCurrentPrice * holding.getQuantity();
 			holding.setValuation(newValuation);
+			totalHoldingsValue += newValuation;
+
+			Long initialInvestment = holding.getAveragePurchasePrice() * holding.getQuantity();
+			totalInitialInvestment += initialInvestment;
 
 			// 수익률 = ((현재 가격 - 평균 매수가) / 평균 매수가) * 100
 			Double newYield = ((double) (newCurrentPrice - holding.getAveragePurchasePrice())
@@ -48,6 +55,19 @@ public class AccountHoldingService implements AccountHoldingUseCase {
 
 			holdingStockPort.save(holding);
 		}
+
+		// 현재 총 자산 = 예수금 + 주식들 평가금액 * 보유 수량의 합
+		Long currentTotalAsset = accountAsset.getDeposit() + totalHoldingsValue;
+
+		// 초기 총 자산 = 예수금 + 주식들 평균 매수금액 * 보유 수량의 합
+		Long initialTotalAsset = accountAsset.getDeposit() + totalInitialInvestment;
+		double totalInvestmentYield =
+				((double) (currentTotalAsset - initialTotalAsset) / initialTotalAsset) * 100;
+		accountAsset.setInvestmentYield(totalInvestmentYield);
+
+		accountAsset.setTotalHoldingsValue(totalHoldingsValue);
+		accountAsset.setTotalAsset(accountAsset.getDeposit() + accountAsset.getTotalHoldingsValue());
+		AccountAsset savedAccountAsset = accountAssetPort.saveAsset(accountAsset);
 		return new Output(holdings);
 	}
 }

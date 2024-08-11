@@ -22,7 +22,7 @@ public class AccountAssetResponse {
 
 	@Schema(description = "보유 종목 수")
 	private Long totalHoldingsQuantity;
-	
+
 	@Schema(description = "총 수익률")
 	private Double investmentYield;
 
@@ -33,7 +33,15 @@ public class AccountAssetResponse {
 				domainModel.getDeposit(),
 				domainModel.getTotalHoldingsValue(),
 				domainModel.getTotalHoldingsQuantity(),
-				domainModel.getInvestmentYield()
+				roundYieldToTwoDecimalPlaces(domainModel.getInvestmentYield())
 		);
+	}
+
+	private static Double roundYieldToTwoDecimalPlaces(Double yield) {
+		if (yield == null) {
+			return null;
+		}
+		// 소수점 둘째 자리에서 반올림
+		return Math.round(yield * 100) / 100.0;
 	}
 }
