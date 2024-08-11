@@ -99,6 +99,7 @@ public class StockController {
 				firstHistory.getId(),
 				firstHistory.getStockCode(),
 				firstHistory.getStockName(),
+				firstHistory.getMarket(),
 				lastHistory.getPrices().get(3),
 				newestDate,
 				stockDailyHistories.stream().map(StockDailyHistoryDto::fromDomainModel).toList()
