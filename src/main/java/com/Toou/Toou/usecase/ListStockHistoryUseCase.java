@@ -1,5 +1,6 @@
 package com.Toou.Toou.usecase;
 
+import com.Toou.Toou.domain.model.MarketType;
 import com.Toou.Toou.domain.model.StockDailyHistory;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,5 +26,7 @@ public interface ListStockHistoryUseCase {
 	class Output {
 
 		List<StockDailyHistory> dailyHistories;
+		String stockName;
+		MarketType marketType;
 	}
 }

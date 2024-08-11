@@ -58,8 +58,6 @@ public class StockOpenApiAdapter implements StockOpenApiPort {
 						+ "&endBasDt=" + formattedToDate
 						+ "&itmsNm=" + URLEncoder.encode(companyName, StandardCharsets.UTF_8.toString()));
 
-				System.out.println("Request URI: " + uri);
-
 				StockOpenApiResponse response = webClient.get()
 						.uri(uri)
 						.header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
@@ -69,14 +67,12 @@ public class StockOpenApiAdapter implements StockOpenApiPort {
 
 				if (response == null || response.getResponse() == null
 						|| response.getResponse().getBody() == null) {
-					System.out.println("No data in response, response body is null.");
 					break;
 				}
 
 				List<StockDailyHistoryOpenApiDto> items = response.getResponse().getBody().getItems()
 						.getItem();
 				if (items == null || items.isEmpty()) {
-					System.out.println("No items found in response.");
 					break;
 				}
 
@@ -85,9 +81,6 @@ public class StockOpenApiAdapter implements StockOpenApiPort {
 						.collect(Collectors.toList());
 
 				allHistories.addAll(newHistories);
-
-				System.out.println("Current allHistories: ");
-				newHistories.forEach(System.out::println);
 
 				int totalCount = response.getResponse().getBody().getTotalCount();
 				int totalPages = (int) Math.ceil((double) totalCount / numOfRows);

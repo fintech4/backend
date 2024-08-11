@@ -1,5 +1,6 @@
 package com.Toou.Toou.port.in;
 
+import com.Toou.Toou.domain.model.MarketType;
 import com.Toou.Toou.domain.model.StockDailyHistory;
 import com.Toou.Toou.exception.CustomException;
 import com.Toou.Toou.exception.CustomExceptionDetail;
@@ -74,7 +75,7 @@ public class StockController {
 		ListStockHistoryUseCase.Output output = listStockHistoryUseCase.execute(input);
 		List<StockDailyHistory> stockDailyHistories = output.getDailyHistories();
 		StockHistoryListResponse response = buildStockHistoryListResponse(stockDailyHistories,
-				todayDate);
+				todayDate, output.getStockName(), output.getMarketType());
 		return ResponseEntity.ok().body(response);
 	}
 
@@ -87,7 +88,8 @@ public class StockController {
 	}
 
 	private static StockHistoryListResponse buildStockHistoryListResponse(
-			List<StockDailyHistory> stockDailyHistories, LocalDate newestDate) {
+			List<StockDailyHistory> stockDailyHistories, LocalDate newestDate, String stockName,
+			MarketType marketType) {
 		StockDailyHistory firstHistory = stockDailyHistories.stream().findFirst()
 				.orElseThrow(() -> new CustomException(CustomExceptionDetail.STOCK_NOT_FOUND));
 		StockDailyHistory lastHistory = stockDailyHistories.get(stockDailyHistories.size() - 1);
@@ -97,8 +99,8 @@ public class StockController {
 				firstHistory.getId(),
 				firstHistory.getStockMetadataId().toString(),
 				// stockMetadataId가 아닌 stockCode 사용을 고려하여 수정 필요
-				firstHistory.getStockMetadataId().toString(),  // stockName도 마찬가지
-				"Market Placeholder",  // 시장 정보를 가져오는 로직이 필요
+				stockName,  // stockName도 마찬가지
+				marketType.toString(),  // 시장 정보를 가져오는 로직이 필요
 				lastHistory.getClosingPrice(),
 				newestDate,
 				stockDailyHistories.stream()

@@ -38,12 +38,9 @@ public class ListStockHistoryService implements ListStockHistoryUseCase {
 
 		if (lastDate.isBefore(input.dateTo)) {
 			// lastDate의 다음 날부터 dateTo까지의 데이터를 오픈 API에서 가져옴
-			log.info("시작일 {}, 끝나는일 {}", lastDate.plusDays(1), input.dateTo);
 			List<StockDailyHistory> externalHistories = stockOpenApiPort.findAllHistoriesBetweenDates(
 					stockMetadata.getId(),
 					stockMetadata.getStockName(), lastDate.plusDays(1), input.dateTo);
-			log.info(externalHistories.toString());
-
 			// 4. 가져온 데이터가 비어 있지 않으면 리스트에 추가하고 데이터베이스에도 저장
 			if (!externalHistories.isEmpty()) {
 				externalHistories.forEach(stockHistoryPort::save);
@@ -56,7 +53,7 @@ public class ListStockHistoryService implements ListStockHistoryUseCase {
 						.collect(Collectors.toList());
 			}
 		}
-		return new Output(dailyHistories);
+		return new Output(dailyHistories, stockMetadata.getStockName(), stockMetadata.getMarket());
 	}
 //
 //	private boolean hasAllHistoriesBetweenDates(List<StockDailyHistory> histories, LocalDate dateFrom,
