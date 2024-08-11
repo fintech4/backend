@@ -54,7 +54,7 @@ public class AccountController {
 			@CookieValue(value = "kakaoId", required = true) String kakaoId) {
 		AccountHoldingUseCase.Input input = new AccountHoldingUseCase.Input(kakaoId);
 		AccountHoldingUseCase.Output output = accountHoldingUseCase.execute(input);
-		HoldingListResponse response = new HoldingListResponse(output.getHoldings().stream().map(
+		HoldingListResponse response = new HoldingListResponse(true, output.getHoldings().stream().map(
 				HoldingIndividualDto::fromDomainModel).toList());
 		return ResponseEntity.ok().body(response);
 	}

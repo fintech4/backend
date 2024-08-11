@@ -9,6 +9,8 @@ import lombok.Data;
 @Data
 public class HoldingListResponse {
 
+	private boolean ok;
+	
 	@Schema(description = "보유 주식 별 정보")
 	private List<HoldingIndividualDto> holdings;
 }

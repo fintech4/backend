@@ -8,9 +8,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface StockHistoryJpaRepository extends JpaRepository<StockHistoryEntity, Long> {
 
-	List<StockHistoryEntity> findAllByStockMetadata_StockCodeAndDateBetween(
-			String stockCode, LocalDate dateFrom, LocalDate dateTo);
+	// 수정된 메서드 정의
+	List<StockHistoryEntity> findAllByStockMetadataIdAndDateBetween(Long stockMetadataId,
+			LocalDate dateFrom, LocalDate dateTo);
 
-	Optional<StockHistoryEntity> findFirstByStockMetadata_IdAndDate(Long stockMetadataId,
+	Optional<StockHistoryEntity> findFirstByStockMetadataIdAndDate(Long stockMetadataId,
 			LocalDate date);
 }

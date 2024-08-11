@@ -18,10 +18,10 @@ public class StockHistoryAdapter implements StockHistoryPort {
 	private final StockHistoryJpaRepository stockHistoryJpaRepository;
 
 	@Override
-	public List<StockDailyHistory> findAllHistoriesBetweenDates(String stockCode,
+	public List<StockDailyHistory> findAllHistoriesBetweenDates(Long stockMetadataId,
 			LocalDate dateFrom, LocalDate dateTo) {
-		List<StockHistoryEntity> entities = stockHistoryJpaRepository.findAllByStockMetadata_StockCodeAndDateBetween(
-				stockCode, dateFrom, dateTo);
+		List<StockHistoryEntity> entities = stockHistoryJpaRepository.findAllByStockMetadataIdAndDateBetween(
+				stockMetadataId, dateFrom, dateTo);
 		return entities.stream()
 				.map(this::toDomainModel)
 				.collect(Collectors.toList());
@@ -29,21 +29,42 @@ public class StockHistoryAdapter implements StockHistoryPort {
 
 	@Override
 	public StockDailyHistory findStockHistoryByDate(Long stockMetadataId, LocalDate date) {
-		StockHistoryEntity entity = stockHistoryJpaRepository.findFirstByStockMetadata_IdAndDate(
+		//해당 날짜 전의 최근 값으로 매수/매도
+		StockHistoryEntity entity = stockHistoryJpaRepository.findFirstByStockMetadataIdAndDate(
 				stockMetadataId, date).orElseThrow(
 				() -> new CustomException(CustomExceptionDetail.STOCK_HISTORY_NOT_FOUND));
 		return toDomainModel(entity);
 	}
 
+	@Override
+	public StockDailyHistory save(StockDailyHistory stockDailyHistory) {
+		StockHistoryEntity entity = toEntity(stockDailyHistory);
+		StockHistoryEntity savedEntity = stockHistoryJpaRepository.save(entity);
+		return toDomainModel(savedEntity);
+	}
+
+
 	private StockDailyHistory toDomainModel(StockHistoryEntity entity) {
 		return new StockDailyHistory(
 				entity.getId(),
-				entity.getStockMetadata().getStockCode(),
-				entity.getStockMetadata().getStockName(),
-				entity.getStockMetadata().getMarket().getValue(),
-				List.of(entity.getOpenPrice(), entity.getHighPrice(), entity.getLowPrice(),
-						entity.getClosingPrice()),
+				entity.getStockMetadataId(),
+				entity.getOpenPrice(),
+				entity.getHighPrice(),
+				entity.getLowPrice(),
+				entity.getClosingPrice(),
 				entity.getDate()
 		);
+	}
+
+	private StockHistoryEntity toEntity(StockDailyHistory stockDailyHistory) {
+		StockHistoryEntity entity = new StockHistoryEntity();
+		entity.setStockMetadataId(stockDailyHistory.getStockMetadataId());
+		entity.setOpenPrice(stockDailyHistory.getOpenPrice());
+		entity.setHighPrice(stockDailyHistory.getHighPrice());
+		entity.setLowPrice(stockDailyHistory.getLowPrice());
+		entity.setClosingPrice(stockDailyHistory.getClosingPrice());
+		entity.setDate(stockDailyHistory.getDate());
+
+		return entity;
 	}
 }

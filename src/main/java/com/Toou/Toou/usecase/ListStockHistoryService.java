@@ -1,11 +1,17 @@
 package com.Toou.Toou.usecase;
 
 import com.Toou.Toou.domain.model.StockDailyHistory;
+import com.Toou.Toou.domain.model.StockMetadata;
 import com.Toou.Toou.port.out.StockHistoryPort;
+import com.Toou.Toou.port.out.StockMetadataPort;
 import com.Toou.Toou.port.out.StockOpenApiPort;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,24 +19,49 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ListStockHistoryService implements ListStockHistoryUseCase {
 
+	private static final Logger log = LoggerFactory.getLogger(ListStockHistoryService.class);
 	private final StockHistoryPort stockHistoryPort;
 	private final StockOpenApiPort stockOpenApiPort;
+	private final StockMetadataPort stockMetadataPort;
 
 	@Transactional
 	@Override
 	public Output execute(Input input) {
+		StockMetadata stockMetadata = stockMetadataPort.findStockByStockCode(input.stockCode);
 		List<StockDailyHistory> dailyHistories = stockHistoryPort.findAllHistoriesBetweenDates(
-				input.stockCode, input.dateFrom, input.dateTo);
-//		if (!hasAllHistoriesBetweenDates(dailyHistories, input.dateFrom, input.dateTo)) {
-//			// TODO: (1) stockOpenApiPort를 통해, 오픈 API에서 가져온 데이터를 StockDailyHistory로 변환하고 위 dailyHistories와 합쳐준 뒤 응답해준다.
-//			// TODO: (2) 오픈 API에서 가져온 데이터를 StockDailyHistory로 변환한 결과에 대해 stockHistoryPort를 통해서 DB에 저장해준다.
-//		}
+				stockMetadata.getId(), input.dateFrom, input.dateTo);
+
+		LocalDate lastDate = dailyHistories.stream()
+				.map(StockDailyHistory::getDate)
+				.max(LocalDate::compareTo)
+				.orElse(input.dateFrom);
+
+		if (lastDate.isBefore(input.dateTo)) {
+			// lastDate의 다음 날부터 dateTo까지의 데이터를 오픈 API에서 가져옴
+			log.info("시작일 {}, 끝나는일 {}", lastDate.plusDays(1), input.dateTo);
+			List<StockDailyHistory> externalHistories = stockOpenApiPort.findAllHistoriesBetweenDates(
+					stockMetadata.getId(),
+					stockMetadata.getStockName(), lastDate.plusDays(1), input.dateTo);
+			log.info(externalHistories.toString());
+
+			// 4. 가져온 데이터가 비어 있지 않으면 리스트에 추가하고 데이터베이스에도 저장
+			if (!externalHistories.isEmpty()) {
+				externalHistories.forEach(stockHistoryPort::save);
+				dailyHistories.addAll(externalHistories);
+
+				// 중복된 데이터가 있을 수 있으므로 정렬 및 중복 제거
+				dailyHistories = dailyHistories.stream()
+						.distinct()
+						.sorted(Comparator.comparing(StockDailyHistory::getDate))
+						.collect(Collectors.toList());
+			}
+		}
 		return new Output(dailyHistories);
 	}
-
-	private boolean hasAllHistoriesBetweenDates(List<StockDailyHistory> histories, LocalDate dateFrom,
-			LocalDate dateTo) {
-		// TODO: histories에 있는 각 history들의 date를 확인해서 dateFrom~dateTo 사이 모든 날짜를 커버하는지 확인하는 로직 필요
-		return false;
-	}
+//
+//	private boolean hasAllHistoriesBetweenDates(List<StockDailyHistory> histories, LocalDate dateFrom,
+//			LocalDate dateTo) {
+//		// TODO: histories에 있는 각 history들의 date를 확인해서 dateFrom~dateTo 사이 모든 날짜를 커버하는지 확인하는 로직 필요
+//		return false;
+//	}
 }

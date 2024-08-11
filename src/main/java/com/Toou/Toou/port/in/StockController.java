@@ -34,9 +34,6 @@ public class StockController {
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private LocalDate DUMMY_START_DATE;
 
-	@Value("${dummy.newest-date}")
-	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	private LocalDate DUMMY_NEWEST_DATE;
 
 	@GetMapping
 	ResponseEntity<StockSearchListResponse> listStockMetadataByName(@RequestParam final String name,
@@ -61,8 +58,9 @@ public class StockController {
 			@RequestParam(value = "dateFrom", required = false) LocalDate dateFrom, // "yyyy-MM-dd"
 			@RequestParam(value = "dateTo", required = false) LocalDate dateTo // "yyyy-MM-dd"
 	) {
+		LocalDate todayDate = LocalDate.now();
 		dateFrom = dateFrom == null ? DUMMY_START_DATE : dateFrom;
-		dateTo = dateTo == null ? DUMMY_NEWEST_DATE : dateTo;
+		dateTo = dateTo == null ? todayDate : dateTo;
 
 		if (!isValidDateRange(dateFrom, dateTo)) {
 			return ResponseEntity.badRequest().build();
@@ -76,7 +74,7 @@ public class StockController {
 		ListStockHistoryUseCase.Output output = listStockHistoryUseCase.execute(input);
 		List<StockDailyHistory> stockDailyHistories = output.getDailyHistories();
 		StockHistoryListResponse response = buildStockHistoryListResponse(stockDailyHistories,
-				DUMMY_NEWEST_DATE);
+				todayDate);
 		return ResponseEntity.ok().body(response);
 	}
 
@@ -97,12 +95,15 @@ public class StockController {
 		return new StockHistoryListResponse(
 				true,
 				firstHistory.getId(),
-				firstHistory.getStockCode(),
-				firstHistory.getStockName(),
-				firstHistory.getMarket(),
-				lastHistory.getPrices().get(3),
+				firstHistory.getStockMetadataId().toString(),
+				// stockMetadataId가 아닌 stockCode 사용을 고려하여 수정 필요
+				firstHistory.getStockMetadataId().toString(),  // stockName도 마찬가지
+				"Market Placeholder",  // 시장 정보를 가져오는 로직이 필요
+				lastHistory.getClosingPrice(),
 				newestDate,
-				stockDailyHistories.stream().map(StockDailyHistoryDto::fromDomainModel).toList()
+				stockDailyHistories.stream()
+						.map(StockDailyHistoryDto::fromDomainModel)
+						.toList()
 		);
 	}
 }

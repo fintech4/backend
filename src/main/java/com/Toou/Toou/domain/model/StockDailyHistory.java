@@ -1,7 +1,6 @@
 package com.Toou.Toou.domain.model;
 
 import java.time.LocalDate;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,9 +11,10 @@ import lombok.NoArgsConstructor;
 public class StockDailyHistory {
 
 	private Long id;
-	private String stockCode;
-	private String stockName;
-	private String market;
-	private List<Long> prices; // 시가, 고가, 저가, 종가
-	private LocalDate date; // 해당 날짜
+	private Long stockMetadataId;
+	private Long openPrice;
+	private Long highPrice;
+	private Long lowPrice;
+	private Long closingPrice;
+	private LocalDate date;
 }

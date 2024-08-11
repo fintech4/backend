@@ -9,8 +9,6 @@ import lombok.Getter;
 @Getter
 public class HoldingIndividualDto {
 
-	private boolean ok;
-
 	@Schema(description = "종목명")
 	private String stockName;
 
@@ -31,7 +29,6 @@ public class HoldingIndividualDto {
 
 	public static HoldingIndividualDto fromDomainModel(HoldingIndividualStock domainModel) {
 		return new HoldingIndividualDto(
-				true,
 				domainModel.getStockName(),
 				domainModel.getAveragePurchasePrice(),
 				domainModel.getCurrentPrice(),
