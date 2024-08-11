@@ -22,6 +22,9 @@ public class StockHistoryListResponse {
 	@Schema(description = "종목명")
 	private String stockName;
 
+	@Schema(description = "시장")
+	private String market;
+
 	@Schema(description = "최신 주가 데이터 업데이트 날짜에서의 주가")
 	private Long stockNewestPrice;
 

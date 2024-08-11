@@ -40,6 +40,7 @@ public class StockHistoryAdapter implements StockHistoryPort {
 				entity.getId(),
 				entity.getStockMetadata().getStockCode(),
 				entity.getStockMetadata().getStockName(),
+				entity.getStockMetadata().getMarket().getValue(),
 				List.of(entity.getOpenPrice(), entity.getHighPrice(), entity.getLowPrice(),
 						entity.getClosingPrice()),
 				entity.getDate()
