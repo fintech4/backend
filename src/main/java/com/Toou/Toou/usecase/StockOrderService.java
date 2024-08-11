@@ -69,6 +69,7 @@ public class StockOrderService implements StockOrderUseCase {
 
 		//총 자산 변경
 		accountAsset.setDeposit(accountAsset.getDeposit() - totalCost);
+		accountAsset.setTotalHoldingsValue(accountAsset.getTotalHoldingsValue() + totalCost);
 
 		// 보유 주식이 없다면 새로 추가
 		if (holdingIndividualStock == null) {
@@ -114,6 +115,7 @@ public class StockOrderService implements StockOrderUseCase {
 		// 판매 금액 계산 및 deposit 증가
 		Long totalSale = calculateTotalCost(stockOrder);
 		accountAsset.setDeposit(accountAsset.getDeposit() + totalSale);
+		accountAsset.setTotalHoldingsValue(accountAsset.getTotalHoldingsValue() - totalSale);
 
 		// 주식 수량 및 평가 금액 업데이트
 		holdingIndividualStock.setQuantity(
