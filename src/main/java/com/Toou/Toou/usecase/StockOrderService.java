@@ -117,7 +117,12 @@ public class StockOrderService implements StockOrderUseCase {
 		Long newValuation = stockOrder.getTradeType() == TradeType.BUY
 				? holdingIndividualStock.getValuation() + totalPrice
 				: holdingIndividualStock.getValuation() - totalPrice;
-		Long newAveragePurchasePrice = newValuation / newQuantity;
+		Long initialTotalPurchasePrice =
+				holdingIndividualStock.getAveragePurchasePrice() * holdingIndividualStock.getQuantity();
+		Long newTotalPurchasePrice = stockOrder.getTradeType() == TradeType.BUY
+				? initialTotalPurchasePrice + totalPrice
+				: initialTotalPurchasePrice - totalPrice;
+		Long newAveragePurchasePrice = newTotalPurchasePrice / newQuantity;
 		Double newYield =
 				((double) (stockOrder.getStockPrice() - newAveragePurchasePrice) / newAveragePurchasePrice)
 						* 100;

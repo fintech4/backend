@@ -36,6 +36,7 @@ public class AccountHoldingService implements AccountHoldingUseCase {
 			StockMetadata stockMetadata = stockMetadataPort.findStockByStockCode(holding.getStockCode());
 			StockDailyHistory stockDailyHistory = stockHistoryPort.findStockHistoryByDate(
 					stockMetadata.getId(), input.todayDate);
+
 			Long newCurrentPrice = stockDailyHistory.getClosingPrice();
 
 			// 평가 금액 = 현재 가격 * 보유 주식 수
