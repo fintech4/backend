@@ -41,30 +41,23 @@ public class StockOrderService implements StockOrderUseCase {
 		if (stockDailyHistory == null) {
 			throw new CustomException(CustomExceptionDetail.STOCK_HISTORY_NOT_FOUND);
 		}
+
 		StockOrder stockOrder = new StockOrder(input.stockCode, stockMetadata.getStockName(),
 				stockDailyHistory.getClosingPrice(), input.orderQuantity, input.tradeType, accountAsset);
-
 		if (input.tradeType == TradeType.BUY) {
-			handleBuyOrder(stockOrder, accountAsset, input.orderDate);
+			validateBuy(accountAsset, stockOrder, input.orderDate);
+			handleBuyOrder(stockOrder, accountAsset);
 		} else if (input.tradeType == TradeType.SELL) {
-			handleSellOrder(stockOrder, accountAsset, input.orderDate);
+			validateSell(accountAsset, stockOrder, input.orderDate);
+			handleSellOrder(stockOrder, accountAsset);
 		}
 
 		return new Output();
 	}
 
-	private void handleBuyOrder(StockOrder stockOrder, AccountAsset accountAsset,
-			LocalDate orderDate) {
+	private void handleBuyOrder(StockOrder stockOrder, AccountAsset accountAsset) {
 		HoldingIndividualStock holdingIndividualStock = holdingStockPort.findHoldingByStockCodeAndAssetId(
 				stockOrder.getStockCode(), accountAsset.getId());
-
-		StockBuyable stockBuyable = getStockBuyable(accountAsset.getKakaoId(),
-				stockOrder.getStockCode(), orderDate);
-
-		if (stockBuyable.getBuyableQuantity() < stockOrder.getOrderQuantity()) {
-			throw new CustomException(CustomExceptionDetail.WRONG_BUY_ORDER);
-		}
-
 		HoldingIndividualStock updatedHoldingIndividualStock = updateHoldingIndividualStock(stockOrder,
 				holdingIndividualStock, accountAsset);
 
@@ -79,21 +72,13 @@ public class StockOrderService implements StockOrderUseCase {
 
 	}
 
-	private void handleSellOrder(StockOrder stockOrder, AccountAsset accountAsset,
-			LocalDate orderDate) {
+	private void handleSellOrder(StockOrder stockOrder, AccountAsset accountAsset) {
 		// 현재 보유한 주식을 가져옴
 		HoldingIndividualStock holdingIndividualStock = holdingStockPort.findHoldingByStockCodeAndAssetId(
 				stockOrder.getStockCode(), accountAsset.getId());
 
 		if (holdingIndividualStock == null) {
 			throw new CustomException(CustomExceptionDetail.NO_HOLDING_STOCK);
-		}
-
-		StockSellable stockSellable = getStockSellable(accountAsset.getKakaoId(),
-				stockOrder.getStockCode(), orderDate);
-
-		if (stockOrder.getOrderQuantity() > stockSellable.getSellableQuantity()) {
-			throw new CustomException(CustomExceptionDetail.WRONG_SELL_QUANTITY);
 		}
 
 		HoldingIndividualStock updatedHoldingIndividualStock = updateHoldingIndividualStock(stockOrder,
@@ -125,31 +110,29 @@ public class StockOrderService implements StockOrderUseCase {
 
 		//보유 주식 수, 평균 매수가 변경
 		Long totalPrice = calculateTotalPrice(stockOrder);
+		Long newQuantity =
+				stockOrder.getTradeType() == TradeType.BUY
+						? holdingIndividualStock.getQuantity() + stockOrder.getOrderQuantity()
+						: holdingIndividualStock.getQuantity() - stockOrder.getOrderQuantity();
+		Long newValuation = stockOrder.getTradeType() == TradeType.BUY
+				? holdingIndividualStock.getValuation() + totalPrice
+				: holdingIndividualStock.getValuation() - totalPrice;
+		Long newAveragePurchasePrice = newValuation / newQuantity;
+		Double newYield =
+				((double) (stockOrder.getStockPrice() - newAveragePurchasePrice) / newAveragePurchasePrice)
+						* 100;
 
-		if (stockOrder.getTradeType() == TradeType.BUY) {
-			if (holdingIndividualStock == null) { //보유하지 않은 주식이면 추가
-				return new HoldingIndividualStock(stockOrder, accountAsset.getId());
-			}
-			Long newQuantity = holdingIndividualStock.getQuantity() + stockOrder.getOrderQuantity();
-			Long newValuation = holdingIndividualStock.getValuation() + totalPrice;
-			Long newAveragePurchasePrice = newValuation / newQuantity;
-			Double newYield =
-					((double) (newValuation - newAveragePurchasePrice)
-							/ newAveragePurchasePrice) * 100;
-
-			holdingIndividualStock.setQuantity(newQuantity);
-			holdingIndividualStock.setAveragePurchasePrice(newAveragePurchasePrice);
-			holdingIndividualStock.setValuation(newValuation);
-			holdingIndividualStock.setYield(newYield);
-			holdingIndividualStock.setCurrentPrice(stockOrder.getStockPrice());
-			return holdingIndividualStock;
-		}
-
-		holdingIndividualStock.setQuantity(
-				holdingIndividualStock.getQuantity() - stockOrder.getOrderQuantity());
-		holdingIndividualStock.setValuation(holdingIndividualStock.getValuation() - totalPrice);
-
-		return holdingIndividualStock;
+		return new HoldingIndividualStock(
+				holdingIndividualStock.getId(),
+				holdingIndividualStock.getStockCode(),
+				holdingIndividualStock.getStockName(),
+				holdingIndividualStock.getCurrentPrice(),
+				newAveragePurchasePrice,
+				newQuantity,
+				newValuation,
+				newYield,
+				holdingIndividualStock.getAccountAssetId()
+		);
 	}
 
 	private AccountAsset updateAsset(Long totalPrice, AccountAsset accountAsset,
@@ -178,6 +161,26 @@ public class StockOrderService implements StockOrderUseCase {
 
 	private Long calculateTotalPrice(StockOrder stockOrder) {
 		return stockOrder.getStockPrice() * stockOrder.getOrderQuantity();
+	}
+
+	private void validateBuy(AccountAsset accountAsset, StockOrder stockOrder, LocalDate orderDate) {
+		StockBuyable stockBuyable = getStockBuyable(accountAsset.getKakaoId(),
+				stockOrder.getStockCode(), orderDate);
+
+		if (stockBuyable.getBuyableQuantity() < stockOrder.getOrderQuantity()) {
+			throw new CustomException(CustomExceptionDetail.WRONG_BUY_ORDER);
+		}
+
+	}
+
+	private void validateSell(AccountAsset accountAsset, StockOrder stockOrder, LocalDate orderDate) {
+		StockSellable stockSellable = getStockSellable(accountAsset.getKakaoId(),
+				stockOrder.getStockCode(), orderDate);
+
+		if (stockOrder.getOrderQuantity() > stockSellable.getSellableQuantity()) {
+			throw new CustomException(CustomExceptionDetail.WRONG_SELL_QUANTITY);
+		}
+
 	}
 
 	private StockBuyable getStockBuyable(String kakaoId, String stockCode, LocalDate buyDate) {
