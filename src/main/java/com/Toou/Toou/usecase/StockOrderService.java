@@ -15,6 +15,7 @@ import com.Toou.Toou.port.out.HoldingStockPort;
 import com.Toou.Toou.port.out.StockHistoryPort;
 import com.Toou.Toou.port.out.StockMetadataPort;
 import java.time.LocalDate;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -64,40 +65,18 @@ public class StockOrderService implements StockOrderUseCase {
 			throw new CustomException(CustomExceptionDetail.WRONG_BUY_ORDER);
 		}
 
-		// 주문 금액 계산 및 deposit 감소
-		Long totalCost = calculateTotalCost(stockOrder);
+		HoldingIndividualStock updatedHoldingIndividualStock = updateHoldingIndividualStock(stockOrder,
+				holdingIndividualStock, accountAsset);
 
-		//총 자산 변경
-		accountAsset.setDeposit(accountAsset.getDeposit() - totalCost);
-		accountAsset.setTotalHoldingsValue(accountAsset.getTotalHoldingsValue() + totalCost);
+		Long totalPrice = calculateTotalPrice(stockOrder);
+		boolean isStockEmpty = holdingIndividualStock == null;
+		AccountAsset updatedAccountAsset = updateAsset(totalPrice, accountAsset,
+				stockOrder.getTradeType(), isStockEmpty);
 
-		// 보유 주식이 없다면 새로 추가
-		if (holdingIndividualStock == null) {
-			accountAsset.setTotalHoldingsQuantity(accountAsset.getTotalHoldingsQuantity() + 1);
-			AccountAsset savedAccountAsset = accountAssetPort.saveAsset(accountAsset);
-			HoldingIndividualStock newHoldingIndividualStock = new HoldingIndividualStock(stockOrder,
-					savedAccountAsset.getId());
-			HoldingIndividualStock savedHoldingIndividualStock = holdingStockPort.save(
-					newHoldingIndividualStock);
-		} else {
-			// 이미 보유한 주식이라면 수량과 평균 매입가, 평가 금액 업데이트
-			AccountAsset savedAccountAsset = accountAssetPort.saveAsset(accountAsset);
-			Long newQuantity = holdingIndividualStock.getQuantity() + stockOrder.getOrderQuantity();
-			Long newValuation = holdingIndividualStock.getValuation() + totalCost;
-			Long newAveragePurchasePrice = newValuation / newQuantity;
-			Double newYield =
-					((double) (newValuation - newAveragePurchasePrice)
-							/ newAveragePurchasePrice) * 100;
+		HoldingIndividualStock savedHoldingIndividualStock = holdingStockPort.save(
+				updatedHoldingIndividualStock);
+		accountAssetPort.saveAsset(updatedAccountAsset);
 
-			holdingIndividualStock.setQuantity(newQuantity);
-			holdingIndividualStock.setAveragePurchasePrice(newAveragePurchasePrice);
-			holdingIndividualStock.setValuation(newValuation);
-			holdingIndividualStock.setYield(newYield);
-			holdingIndividualStock.setCurrentPrice(stockOrder.getStockPrice());
-
-			HoldingIndividualStock savedHoldingIndividualStock = holdingStockPort.save(
-					holdingIndividualStock);
-		}
 	}
 
 	private void handleSellOrder(StockOrder stockOrder, AccountAsset accountAsset,
@@ -117,36 +96,87 @@ public class StockOrderService implements StockOrderUseCase {
 			throw new CustomException(CustomExceptionDetail.WRONG_SELL_QUANTITY);
 		}
 
-		// 판매 금액 계산 및 deposit 증가
-		Long totalSale = calculateTotalCost(stockOrder);
-		accountAsset.setDeposit(accountAsset.getDeposit() + totalSale);
-		accountAsset.setTotalHoldingsValue(accountAsset.getTotalHoldingsValue() - totalSale);
+		HoldingIndividualStock updatedHoldingIndividualStock = updateHoldingIndividualStock(stockOrder,
+				holdingIndividualStock, accountAsset);
 
-		// 주식 수량 및 평가 금액 업데이트
-		holdingIndividualStock.setQuantity(
-				holdingIndividualStock.getQuantity() - stockOrder.getOrderQuantity());
-		holdingIndividualStock.setValuation(holdingIndividualStock.getValuation() - totalSale);
+		Long totalPrice = calculateTotalPrice(stockOrder);
+		boolean isStockEmpty = false;
+		AccountAsset updatedAccountAsset = updateAsset(totalPrice, accountAsset,
+				stockOrder.getTradeType(), isStockEmpty);
 
-		if (holdingIndividualStock.getQuantity() == 0) {
+		if (updatedHoldingIndividualStock != null) {
+			holdingStockPort.save(updatedHoldingIndividualStock);
+		}
+		AccountAsset savedAccountAsset = accountAssetPort.saveAsset(updatedAccountAsset);
+	}
+
+	private HoldingIndividualStock updateHoldingIndividualStock(StockOrder stockOrder,
+			HoldingIndividualStock holdingIndividualStock, AccountAsset accountAsset) {
+
+		if (stockOrder.getTradeType() == TradeType.BUY && holdingIndividualStock == null) {
+			return new HoldingIndividualStock(stockOrder, accountAsset.getId());
+		}
+
+		if (stockOrder.getTradeType() == TradeType.SELL && Objects.equals(
+				holdingIndividualStock.getQuantity(), stockOrder.getOrderQuantity())) {
 			holdingStockPort.delete(holdingIndividualStock);
-			accountAsset.setTotalHoldingsQuantity(accountAsset.getTotalHoldingsQuantity() - 1);
-			AccountAsset savedAccountAsset = accountAssetPort.saveAsset(accountAsset);
-		} else {
+			return null;
+		}
+
+		//보유 주식 수, 평균 매수가 변경
+		Long totalPrice = calculateTotalPrice(stockOrder);
+
+		if (stockOrder.getTradeType() == TradeType.BUY) {
+			if (holdingIndividualStock == null) { //보유하지 않은 주식이면 추가
+				return new HoldingIndividualStock(stockOrder, accountAsset.getId());
+			}
 			Long newQuantity = holdingIndividualStock.getQuantity() + stockOrder.getOrderQuantity();
-			Long newValuation = holdingIndividualStock.getValuation() - totalSale;
+			Long newValuation = holdingIndividualStock.getValuation() + totalPrice;
 			Long newAveragePurchasePrice = newValuation / newQuantity;
 			Double newYield =
 					((double) (newValuation - newAveragePurchasePrice)
 							/ newAveragePurchasePrice) * 100;
 
+			holdingIndividualStock.setQuantity(newQuantity);
 			holdingIndividualStock.setAveragePurchasePrice(newAveragePurchasePrice);
+			holdingIndividualStock.setValuation(newValuation);
 			holdingIndividualStock.setYield(newYield);
-			holdingStockPort.save(holdingIndividualStock);
-			AccountAsset savedAccountAsset = accountAssetPort.saveAsset(accountAsset);
+			holdingIndividualStock.setCurrentPrice(stockOrder.getStockPrice());
+			return holdingIndividualStock;
 		}
+
+		holdingIndividualStock.setQuantity(
+				holdingIndividualStock.getQuantity() - stockOrder.getOrderQuantity());
+		holdingIndividualStock.setValuation(holdingIndividualStock.getValuation() - totalPrice);
+
+		return holdingIndividualStock;
 	}
 
-	private Long calculateTotalCost(StockOrder stockOrder) {
+	private AccountAsset updateAsset(Long totalPrice, AccountAsset accountAsset,
+			TradeType tradeType, boolean isStockEmpty) {
+		// 총 자산, 투자 수익률 변화 x
+		// 예수금 변화
+		// 총 투자금 변화
+		// 총 종목수 변화
+		if (tradeType == TradeType.BUY) {
+			accountAsset.setDeposit(accountAsset.getDeposit() - totalPrice);
+			accountAsset.setTotalHoldingsValue(accountAsset.getTotalHoldingsValue() + totalPrice);
+
+			if (isStockEmpty) {
+				accountAsset.setTotalHoldingsQuantity(accountAsset.getTotalHoldingsQuantity() + 1);
+			}
+			return accountAsset;
+		}
+		accountAsset.setDeposit(accountAsset.getDeposit() + totalPrice);
+		accountAsset.setTotalHoldingsValue(accountAsset.getTotalHoldingsValue() - totalPrice);
+
+		if (isStockEmpty) {
+			accountAsset.setTotalHoldingsQuantity(accountAsset.getTotalHoldingsQuantity() + 1);
+		}
+		return accountAsset;
+	}
+
+	private Long calculateTotalPrice(StockOrder stockOrder) {
 		return stockOrder.getStockPrice() * stockOrder.getOrderQuantity();
 	}
 
