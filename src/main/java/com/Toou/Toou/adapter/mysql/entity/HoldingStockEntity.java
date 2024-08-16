@@ -26,8 +26,8 @@ public class HoldingStockEntity {
 	@Column(name = "stock_name", nullable = false)
 	private String stockName;
 
-	@Column(name = "average_purchase_price", nullable = false)
-	private Long averagePurchasePrice;
+	@Column(name = "average_buy_price", nullable = false)
+	private Long averageBuyPrice;
 
 	@Column(name = "current_price", nullable = false)
 	private Long currentPrice;
@@ -40,6 +40,9 @@ public class HoldingStockEntity {
 
 	@Column(name = "yield", nullable = false)
 	private Double yield;
+
+	@Column(name = "principal", nullable = false)
+	private Long principal;
 
 	@Column(name = "account_asset_id", nullable = false)
 	private Long accountAssetId;

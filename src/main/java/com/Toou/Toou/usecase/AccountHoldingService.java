@@ -35,32 +35,10 @@ public class AccountHoldingService implements AccountHoldingUseCase {
 		for (HoldingIndividualStock holding : holdings) {
 			StockMetadata stockMetadata = stockMetadataPort.findStockByStockCode(holding.getStockCode());
 			StockDailyHistory stockDailyHistory = stockHistoryPort.findStockHistoryByDate(
-					stockMetadata.getId(), input.todayDate);
-
-			Long newCurrentPrice = stockDailyHistory.getClosingPrice();
-
-			// 평가 금액 = 현재 가격 * 보유 주식 수
-			Long newValuation = newCurrentPrice * holding.getQuantity();
-			totalHoldingsValue += newValuation;
-
-			Long initialInvestment = holding.getAveragePurchasePrice() * holding.getQuantity();
-			totalInitialInvestment += initialInvestment;
-
-			// 수익률 = ((현재 가격 - 평균 매수가) / 평균 매수가) * 100
-			Double newYield = ((double) (newCurrentPrice - holding.getAveragePurchasePrice())
-					/ holding.getAveragePurchasePrice()) * 100;
-
-			HoldingIndividualStock newHolding = new HoldingIndividualStock(
-					holding.getId(),
-					holding.getStockCode(),
-					holding.getStockName(),
-					holding.getAveragePurchasePrice(),
-					newCurrentPrice,
-					holding.getQuantity(),
-					newValuation,
-					newYield,
-					holding.getAccountAssetId()
-			);
+					stockMetadata.getId(),
+					input.todayDate); //TODO: DB에 저장한 값이 최신 값이 아닐 경우, open api로 값을 저장해야함
+			HoldingIndividualStock newHolding = holding.updateWithNewHoldingsData(
+					stockDailyHistory.getClosingPrice());
 			holdingStockPort.save(newHolding);
 		}
 		AccountAsset updatedAccountAsset = accountAsset.updateWithNewHoldingsData(totalHoldingsValue,

@@ -15,7 +15,6 @@ import com.Toou.Toou.port.out.HoldingStockPort;
 import com.Toou.Toou.port.out.StockHistoryPort;
 import com.Toou.Toou.port.out.StockMetadataPort;
 import java.time.LocalDate;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -58,11 +57,13 @@ public class StockOrderService implements StockOrderUseCase {
 	private void handleBuyOrder(StockOrder stockOrder, AccountAsset accountAsset) {
 		HoldingIndividualStock holdingIndividualStock = holdingStockPort.findHoldingByStockCodeAndAssetId(
 				stockOrder.getStockCode(), accountAsset.getId());
-		HoldingIndividualStock updatedHoldingIndividualStock = updateHoldingIndividualStock(stockOrder,
-				holdingIndividualStock, accountAsset);
+
+		boolean isFirstBuy = holdingIndividualStock == null;
+		HoldingIndividualStock updatedHoldingIndividualStock = isFirstBuy
+				? new HoldingIndividualStock(stockOrder, accountAsset.getId())
+				: holdingIndividualStock.updateWhenBuyStock(stockOrder);
 
 		Long totalPrice = calculateTotalPrice(stockOrder);
-		boolean isFirstBuy = holdingIndividualStock == null;
 		AccountAsset updatedAccountAsset = accountAsset.updateWhenBuyStock(totalPrice, isFirstBuy);
 
 		HoldingIndividualStock savedHoldingIndividualStock = holdingStockPort.save(
@@ -80,63 +81,21 @@ public class StockOrderService implements StockOrderUseCase {
 			throw new CustomException(CustomExceptionDetail.NO_HOLDING_STOCK);
 		}
 
-		HoldingIndividualStock updatedHoldingIndividualStock = updateHoldingIndividualStock(stockOrder,
-				holdingIndividualStock, accountAsset);
+		boolean isLastStockSold = holdingIndividualStock.getQuantity() == stockOrder.getOrderQuantity();
+		HoldingIndividualStock updatedHoldingIndividualStock = isLastStockSold
+				? null
+				: holdingIndividualStock.updateWhenSellStock(stockOrder);
 
 		Long totalPrice = calculateTotalPrice(stockOrder);
-		boolean isLastStockSold = updatedHoldingIndividualStock == null;
 		AccountAsset updatedAccountAsset = accountAsset.updateWhenSellStock(totalPrice,
 				isLastStockSold);
 
-		if (updatedHoldingIndividualStock != null) {
+		if (isLastStockSold) {
+			holdingStockPort.delete(holdingIndividualStock);
+		} else {
 			holdingStockPort.save(updatedHoldingIndividualStock);
 		}
 		AccountAsset savedAccountAsset = accountAssetPort.saveAsset(updatedAccountAsset);
-	}
-
-	private HoldingIndividualStock updateHoldingIndividualStock(StockOrder stockOrder,
-			HoldingIndividualStock holdingIndividualStock, AccountAsset accountAsset) {
-
-		if (stockOrder.getTradeType() == TradeType.BUY && holdingIndividualStock == null) {
-			return new HoldingIndividualStock(stockOrder, accountAsset.getId());
-		}
-
-		if (stockOrder.getTradeType() == TradeType.SELL && Objects.equals(
-				holdingIndividualStock.getQuantity(), stockOrder.getOrderQuantity())) {
-			holdingStockPort.delete(holdingIndividualStock);
-			return null;
-		}
-
-		//보유 주식 수, 평균 매수가 변경
-		Long totalPrice = calculateTotalPrice(stockOrder);
-		Long newQuantity =
-				stockOrder.getTradeType() == TradeType.BUY
-						? holdingIndividualStock.getQuantity() + stockOrder.getOrderQuantity()
-						: holdingIndividualStock.getQuantity() - stockOrder.getOrderQuantity();
-		Long newValuation = stockOrder.getTradeType() == TradeType.BUY
-				? holdingIndividualStock.getValuation() + totalPrice
-				: holdingIndividualStock.getValuation() - totalPrice;
-		Long initialTotalPurchasePrice =
-				holdingIndividualStock.getAveragePurchasePrice() * holdingIndividualStock.getQuantity();
-		Long newTotalPurchasePrice = stockOrder.getTradeType() == TradeType.BUY
-				? initialTotalPurchasePrice + totalPrice
-				: initialTotalPurchasePrice - totalPrice;
-		Long newAveragePurchasePrice = newTotalPurchasePrice / newQuantity;
-		Double newYield =
-				((double) (stockOrder.getStockPrice() - newAveragePurchasePrice) / newAveragePurchasePrice)
-						* 100;
-
-		return new HoldingIndividualStock(
-				holdingIndividualStock.getId(),
-				holdingIndividualStock.getStockCode(),
-				holdingIndividualStock.getStockName(),
-				holdingIndividualStock.getCurrentPrice(),
-				newAveragePurchasePrice,
-				newQuantity,
-				newValuation,
-				newYield,
-				holdingIndividualStock.getAccountAssetId()
-		);
 	}
 
 	private Long calculateTotalPrice(StockOrder stockOrder) {

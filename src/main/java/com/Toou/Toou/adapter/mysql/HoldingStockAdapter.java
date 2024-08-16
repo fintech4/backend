@@ -49,12 +49,13 @@ public class HoldingStockAdapter implements HoldingStockPort {
 				entity.getId(),
 				entity.getStockCode(),
 				entity.getStockName(),
-				entity.getAveragePurchasePrice(),
+				entity.getAverageBuyPrice(),
 				entity.getCurrentPrice(),
 				entity.getQuantity(),
 				entity.getValuation(),
 				entity.getYield(),
-				entity.getAccountAssetId()
+				entity.getAccountAssetId(),
+				entity.getPrincipal()
 		);
 	}
 
@@ -63,12 +64,13 @@ public class HoldingStockAdapter implements HoldingStockPort {
 				holdingIndividualStock.getId(),
 				holdingIndividualStock.getStockCode(),
 				holdingIndividualStock.getStockName(),
-				holdingIndividualStock.getAveragePurchasePrice(),
+				holdingIndividualStock.getAverageBuyPrice(),
 				holdingIndividualStock.getCurrentPrice(),
 				holdingIndividualStock.getQuantity(),
 				holdingIndividualStock.getValuation(),
 				holdingIndividualStock.getYield(),
-				holdingIndividualStock.getAccountAssetId()
+				holdingIndividualStock.getAccountAssetId(),
+				holdingIndividualStock.getPrincipal()
 		);
 	}
 }
