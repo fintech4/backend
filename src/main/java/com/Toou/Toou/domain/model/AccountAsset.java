@@ -4,12 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@Setter
 @Builder
 public class AccountAsset {
 
@@ -20,4 +18,47 @@ public class AccountAsset {
 	private Long totalHoldingsValue;
 	private Long totalHoldingsQuantity;
 	private Double investmentYield;
+
+	public AccountAsset updateWhenBuyStock(Long totalPrice, boolean isFirstBuy) {
+		return new AccountAsset(
+				this.id,
+				this.kakaoId,
+				this.totalAsset,
+				this.deposit - totalPrice,
+				this.totalHoldingsValue + totalPrice,
+				isFirstBuy ? this.totalHoldingsQuantity + 1 : this.totalHoldingsQuantity,
+				this.investmentYield
+		);
+	}
+
+
+	public AccountAsset updateWhenSellStock(Long totalPrice, boolean isLastStockSold) {
+		return new AccountAsset(
+				this.id,
+				this.kakaoId,
+				this.totalAsset,
+				this.deposit + totalPrice,
+				this.totalHoldingsValue - totalPrice,
+				isLastStockSold ? this.totalHoldingsQuantity - 1 : this.totalHoldingsQuantity,
+				this.investmentYield
+		);
+	}
+
+	public AccountAsset updateWithNewHoldingsData(Long totalHoldingsValue,
+			Long totalInitialInvestment) {
+		long newTotalAsset = this.deposit + totalHoldingsValue;
+		long initialTotalAsset = this.deposit + totalInitialInvestment;
+		double newInvestmentYield =
+				((double) (newTotalAsset - initialTotalAsset) / initialTotalAsset) * 100;
+		return new AccountAsset(
+				this.id,
+				this.kakaoId,
+				newTotalAsset,
+				this.deposit,
+				totalHoldingsValue,
+				this.totalHoldingsQuantity,
+				newInvestmentYield
+		);
+	}
+
 }

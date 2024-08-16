@@ -63,19 +63,9 @@ public class AccountHoldingService implements AccountHoldingUseCase {
 			);
 			holdingStockPort.save(newHolding);
 		}
-
-		// 현재 총 자산 = 예수금 + 주식들 평가금액 * 보유 수량의 합
-		Long currentTotalAsset = accountAsset.getDeposit() + totalHoldingsValue;
-
-		// 초기 총 자산 = 예수금 + 주식들 평균 매수금액 * 보유 수량의 합
-		Long initialTotalAsset = accountAsset.getDeposit() + totalInitialInvestment;
-		double totalInvestmentYield =
-				((double) (currentTotalAsset - initialTotalAsset) / initialTotalAsset) * 100;
-		accountAsset.setInvestmentYield(totalInvestmentYield);
-
-		accountAsset.setTotalHoldingsValue(totalHoldingsValue);
-		accountAsset.setTotalAsset(accountAsset.getDeposit() + accountAsset.getTotalHoldingsValue());
-		AccountAsset savedAccountAsset = accountAssetPort.saveAsset(accountAsset);
+		AccountAsset updatedAccountAsset = accountAsset.updateWithNewHoldingsData(totalHoldingsValue,
+				totalInitialInvestment);
+		AccountAsset savedAccountAsset = accountAssetPort.saveAsset(updatedAccountAsset);
 		return new Output(holdings);
 	}
 }

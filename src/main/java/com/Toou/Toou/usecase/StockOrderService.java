@@ -62,9 +62,8 @@ public class StockOrderService implements StockOrderUseCase {
 				holdingIndividualStock, accountAsset);
 
 		Long totalPrice = calculateTotalPrice(stockOrder);
-		boolean isStockEmpty = holdingIndividualStock == null;
-		AccountAsset updatedAccountAsset = updateAsset(totalPrice, accountAsset,
-				stockOrder.getTradeType(), isStockEmpty);
+		boolean isFirstBuy = holdingIndividualStock == null;
+		AccountAsset updatedAccountAsset = accountAsset.updateWhenBuyStock(totalPrice, isFirstBuy);
 
 		HoldingIndividualStock savedHoldingIndividualStock = holdingStockPort.save(
 				updatedHoldingIndividualStock);
@@ -85,9 +84,9 @@ public class StockOrderService implements StockOrderUseCase {
 				holdingIndividualStock, accountAsset);
 
 		Long totalPrice = calculateTotalPrice(stockOrder);
-		boolean isStockEmpty = false;
-		AccountAsset updatedAccountAsset = updateAsset(totalPrice, accountAsset,
-				stockOrder.getTradeType(), isStockEmpty);
+		boolean isLastStockSold = updatedHoldingIndividualStock == null;
+		AccountAsset updatedAccountAsset = accountAsset.updateWhenSellStock(totalPrice,
+				isLastStockSold);
 
 		if (updatedHoldingIndividualStock != null) {
 			holdingStockPort.save(updatedHoldingIndividualStock);
@@ -138,30 +137,6 @@ public class StockOrderService implements StockOrderUseCase {
 				newYield,
 				holdingIndividualStock.getAccountAssetId()
 		);
-	}
-
-	private AccountAsset updateAsset(Long totalPrice, AccountAsset accountAsset,
-			TradeType tradeType, boolean isStockEmpty) {
-		// 총 자산, 투자 수익률 변화 x
-		// 예수금 변화
-		// 총 투자금 변화
-		// 총 종목수 변화
-		if (tradeType == TradeType.BUY) {
-			accountAsset.setDeposit(accountAsset.getDeposit() - totalPrice);
-			accountAsset.setTotalHoldingsValue(accountAsset.getTotalHoldingsValue() + totalPrice);
-
-			if (isStockEmpty) {
-				accountAsset.setTotalHoldingsQuantity(accountAsset.getTotalHoldingsQuantity() + 1);
-			}
-			return accountAsset;
-		}
-		accountAsset.setDeposit(accountAsset.getDeposit() + totalPrice);
-		accountAsset.setTotalHoldingsValue(accountAsset.getTotalHoldingsValue() - totalPrice);
-
-		if (isStockEmpty) {
-			accountAsset.setTotalHoldingsQuantity(accountAsset.getTotalHoldingsQuantity() + 1);
-		}
-		return accountAsset;
 	}
 
 	private Long calculateTotalPrice(StockOrder stockOrder) {
