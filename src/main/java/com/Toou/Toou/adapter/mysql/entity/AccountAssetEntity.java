@@ -37,4 +37,8 @@ public class AccountAssetEntity {
 
 	@Column(name = "investment_yield", nullable = false)
 	private Double investmentYield;
+
+	@Column(name = "total_principal", nullable = false)
+	private Long totalPrincipal;
+
 }

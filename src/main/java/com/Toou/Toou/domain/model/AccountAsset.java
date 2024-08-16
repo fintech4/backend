@@ -18,38 +18,56 @@ public class AccountAsset {
 	private Long totalHoldingsValue;
 	private Long totalHoldingsQuantity;
 	private Double investmentYield;
+	private Long totalPrincipal;
 
-	public AccountAsset updateWhenBuyStock(Long totalPrice, boolean isFirstBuy) {
+	public AccountAsset updateWhenBuyStock(StockOrder stockOrder, boolean isFirstBuy) {
+		Long totalOrderValue = stockOrder.getStockPrice() * stockOrder.getOrderQuantity();
+		Long newDeposit = this.deposit - totalOrderValue;
+		Long newTotalHoldingsValue = this.totalHoldingsValue + totalOrderValue;
+		Long newTotalHoldingsQuantity = isFirstBuy
+				? this.totalHoldingsQuantity + 1
+				: this.totalHoldingsQuantity;
+		Long newPrincipal = this.totalPrincipal + newTotalHoldingsValue;
+
 		return new AccountAsset(
 				this.id,
 				this.kakaoId,
 				this.totalAsset,
-				this.deposit - totalPrice,
-				this.totalHoldingsValue + totalPrice,
-				isFirstBuy ? this.totalHoldingsQuantity + 1 : this.totalHoldingsQuantity,
-				this.investmentYield
+				newDeposit,
+				newTotalHoldingsValue,
+				newTotalHoldingsQuantity,
+				this.investmentYield,
+				newPrincipal
 		);
 	}
 
 
-	public AccountAsset updateWhenSellStock(Long totalPrice, boolean isLastStockSold) {
+	public AccountAsset updateWhenSellStock(StockOrder stockOrder, boolean isLastStockSold) {
+		Long totalOrderValue = stockOrder.getStockPrice() * stockOrder.getOrderQuantity();
+		Long newDeposit = this.deposit + totalOrderValue;
+		Long newTotalHoldingsValue = this.totalHoldingsValue - totalOrderValue;
+		Long newTotalHoldingsQuantity = isLastStockSold
+				? this.totalHoldingsQuantity - 1
+				: this.totalHoldingsQuantity;
+		Long newPrincipal = this.totalPrincipal - newTotalHoldingsValue;
+
 		return new AccountAsset(
 				this.id,
 				this.kakaoId,
 				this.totalAsset,
-				this.deposit + totalPrice,
-				this.totalHoldingsValue - totalPrice,
-				isLastStockSold ? this.totalHoldingsQuantity - 1 : this.totalHoldingsQuantity,
-				this.investmentYield
+				newDeposit,
+				newTotalHoldingsValue,
+				newTotalHoldingsQuantity,
+				this.investmentYield,
+				newPrincipal
 		);
 	}
 
-	public AccountAsset updateWithNewHoldingsData(Long totalHoldingsValue,
-			Long totalInitialInvestment) {
+	public AccountAsset updateWithNewHoldingsData(Long totalHoldingsValue) {
 		long newTotalAsset = this.deposit + totalHoldingsValue;
-		long initialTotalAsset = this.deposit + totalInitialInvestment;
 		double newInvestmentYield =
-				((double) (newTotalAsset - initialTotalAsset) / initialTotalAsset) * 100;
+				((double) (newTotalAsset - this.totalPrincipal) / this.totalPrincipal) * 100;
+
 		return new AccountAsset(
 				this.id,
 				this.kakaoId,
@@ -57,7 +75,8 @@ public class AccountAsset {
 				this.deposit,
 				totalHoldingsValue,
 				this.totalHoldingsQuantity,
-				newInvestmentYield
+				newInvestmentYield,
+				this.totalPrincipal
 		);
 	}
 

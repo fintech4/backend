@@ -30,7 +30,6 @@ public class AccountHoldingService implements AccountHoldingUseCase {
 				accountAsset.getId());
 
 		Long totalHoldingsValue = 0L;
-		Long totalInitialInvestment = 0L;  // 주식들 평균 매수금액 * 보유 수량의 합
 
 		for (HoldingIndividualStock holding : holdings) {
 			StockMetadata stockMetadata = stockMetadataPort.findStockByStockCode(holding.getStockCode());
@@ -41,8 +40,7 @@ public class AccountHoldingService implements AccountHoldingUseCase {
 					stockDailyHistory.getClosingPrice());
 			holdingStockPort.save(newHolding);
 		}
-		AccountAsset updatedAccountAsset = accountAsset.updateWithNewHoldingsData(totalHoldingsValue,
-				totalInitialInvestment);
+		AccountAsset updatedAccountAsset = accountAsset.updateWithNewHoldingsData(totalHoldingsValue);
 		AccountAsset savedAccountAsset = accountAssetPort.saveAsset(updatedAccountAsset);
 		return new Output(holdings);
 	}

@@ -37,7 +37,8 @@ public class AccountAssetAdapter implements AccountAssetPort {
 				entity.getDeposit(),
 				entity.getTotalHoldingsValue(),
 				entity.getTotalHoldingsQuantity(),
-				entity.getInvestmentYield()
+				entity.getInvestmentYield(),
+				entity.getTotalPrincipal()
 		);
 	}
 
@@ -49,7 +50,8 @@ public class AccountAssetAdapter implements AccountAssetPort {
 				accountAsset.getDeposit(),
 				accountAsset.getTotalHoldingsValue(),
 				accountAsset.getTotalHoldingsQuantity(),
-				accountAsset.getInvestmentYield()
+				accountAsset.getInvestmentYield(),
+				accountAsset.getTotalPrincipal()
 		);
 	}
 }

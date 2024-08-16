@@ -31,9 +31,9 @@ VALUES (1, 10000, 11000, 9000, 10500, '2023-08-01'),  -- AJ네트웍스
 
 -- 초기 Account Asset 데이터
 INSERT INTO account_asset (kakao_id, total_asset, deposit, total_holdings_value,
-                           total_holdings_quantity, investment_yield)
-VALUES ('kakao123', 500000, 500000, 0, 0, 0),
-       ('kakao456', 500000, 500000, 0, 0, 0);
+                           total_holdings_quantity, investment_yield, total_principal)
+VALUES ('kakao123', 500000, 500000, 0, 0, 0, 0),
+       ('kakao456', 500000, 500000, 0, 0, 0, 0);
 
 -- 초기 Holding Individual Stock 데이터
 -- INSERT INTO holding_individual_stock (stock_code, stock_name, average_purchase_price, current_price,

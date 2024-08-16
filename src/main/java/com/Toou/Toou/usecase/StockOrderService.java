@@ -63,9 +63,7 @@ public class StockOrderService implements StockOrderUseCase {
 				? new HoldingIndividualStock(stockOrder, accountAsset.getId())
 				: holdingIndividualStock.updateWhenBuyStock(stockOrder);
 
-		Long totalPrice = calculateTotalPrice(stockOrder);
-		AccountAsset updatedAccountAsset = accountAsset.updateWhenBuyStock(totalPrice, isFirstBuy);
-
+		AccountAsset updatedAccountAsset = accountAsset.updateWhenBuyStock(stockOrder, isFirstBuy);
 		HoldingIndividualStock savedHoldingIndividualStock = holdingStockPort.save(
 				updatedHoldingIndividualStock);
 		accountAssetPort.saveAsset(updatedAccountAsset);
@@ -86,8 +84,7 @@ public class StockOrderService implements StockOrderUseCase {
 				? null
 				: holdingIndividualStock.updateWhenSellStock(stockOrder);
 
-		Long totalPrice = calculateTotalPrice(stockOrder);
-		AccountAsset updatedAccountAsset = accountAsset.updateWhenSellStock(totalPrice,
+		AccountAsset updatedAccountAsset = accountAsset.updateWhenSellStock(stockOrder,
 				isLastStockSold);
 
 		if (isLastStockSold) {
@@ -96,10 +93,6 @@ public class StockOrderService implements StockOrderUseCase {
 			holdingStockPort.save(updatedHoldingIndividualStock);
 		}
 		AccountAsset savedAccountAsset = accountAssetPort.saveAsset(updatedAccountAsset);
-	}
-
-	private Long calculateTotalPrice(StockOrder stockOrder) {
-		return stockOrder.getStockPrice() * stockOrder.getOrderQuantity();
 	}
 
 	private void validateBuy(AccountAsset accountAsset, StockOrder stockOrder, LocalDate orderDate) {
