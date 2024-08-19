@@ -25,57 +25,23 @@ public class AccountHoldingService implements AccountHoldingUseCase {
 	@Transactional
 	@Override
 	public Output execute(AccountHoldingUseCase.Input input) {
-		AccountAsset accountAsset = accountAssetPort.findAssetByKakaoId(input.kakaoId);
+		AccountAsset accountAsset = accountAssetPort.findByProviderId(input.providerId);
 		List<HoldingIndividualStock> holdings = holdingStockPort.findAllHoldingsByAccountAssetId(
 				accountAsset.getId());
 
 		Long totalHoldingsValue = 0L;
-		Long totalInitialInvestment = 0L;  // 주식들 평균 매수금액 * 보유 수량의 합
 
 		for (HoldingIndividualStock holding : holdings) {
 			StockMetadata stockMetadata = stockMetadataPort.findStockByStockCode(holding.getStockCode());
 			StockDailyHistory stockDailyHistory = stockHistoryPort.findStockHistoryByDate(
-					stockMetadata.getId(), input.todayDate);
-
-			Long newCurrentPrice = stockDailyHistory.getClosingPrice();
-
-			// 평가 금액 = 현재 가격 * 보유 주식 수
-			Long newValuation = newCurrentPrice * holding.getQuantity();
-			totalHoldingsValue += newValuation;
-
-			Long initialInvestment = holding.getAveragePurchasePrice() * holding.getQuantity();
-			totalInitialInvestment += initialInvestment;
-
-			// 수익률 = ((현재 가격 - 평균 매수가) / 평균 매수가) * 100
-			Double newYield = ((double) (newCurrentPrice - holding.getAveragePurchasePrice())
-					/ holding.getAveragePurchasePrice()) * 100;
-
-			HoldingIndividualStock newHolding = new HoldingIndividualStock(
-					holding.getId(),
-					holding.getStockCode(),
-					holding.getStockName(),
-					holding.getAveragePurchasePrice(),
-					newCurrentPrice,
-					holding.getQuantity(),
-					newValuation,
-					newYield,
-					holding.getAccountAssetId()
-			);
+					stockMetadata.getId(),
+					input.todayDate); //TODO: DB에 저장한 값이 최신 값이 아닐 경우, open api로 값을 저장해야함
+			HoldingIndividualStock newHolding = holding.updateWithNewHoldingsData(
+					stockDailyHistory.getClosingPrice());
 			holdingStockPort.save(newHolding);
 		}
-
-		// 현재 총 자산 = 예수금 + 주식들 평가금액 * 보유 수량의 합
-		Long currentTotalAsset = accountAsset.getDeposit() + totalHoldingsValue;
-
-		// 초기 총 자산 = 예수금 + 주식들 평균 매수금액 * 보유 수량의 합
-		Long initialTotalAsset = accountAsset.getDeposit() + totalInitialInvestment;
-		double totalInvestmentYield =
-				((double) (currentTotalAsset - initialTotalAsset) / initialTotalAsset) * 100;
-		accountAsset.setInvestmentYield(totalInvestmentYield);
-
-		accountAsset.setTotalHoldingsValue(totalHoldingsValue);
-		accountAsset.setTotalAsset(accountAsset.getDeposit() + accountAsset.getTotalHoldingsValue());
-		AccountAsset savedAccountAsset = accountAssetPort.saveAsset(accountAsset);
+		AccountAsset updatedAccountAsset = accountAsset.updateWithNewHoldingsData(totalHoldingsValue);
+		AccountAsset savedAccountAsset = accountAssetPort.saveAsset(updatedAccountAsset);
 		return new Output(holdings);
 	}
 }

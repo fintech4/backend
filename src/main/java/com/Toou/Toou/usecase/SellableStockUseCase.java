@@ -13,7 +13,7 @@ public interface SellableStockUseCase {
 	class Input {
 
 		String stockCode;
-		String kakaoId;
+		String providerId;
 	}
 
 	@AllArgsConstructor

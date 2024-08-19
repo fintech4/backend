@@ -15,7 +15,7 @@ public interface StockOrderUseCase {
 
 		String stockCode;
 		LocalDate orderDate;
-		String kakaoId;
+		String providerId;
 		TradeType tradeType;
 		Long orderQuantity;
 	}

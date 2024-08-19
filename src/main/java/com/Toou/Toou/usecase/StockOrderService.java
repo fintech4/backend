@@ -15,7 +15,6 @@ import com.Toou.Toou.port.out.HoldingStockPort;
 import com.Toou.Toou.port.out.StockHistoryPort;
 import com.Toou.Toou.port.out.StockMetadataPort;
 import java.time.LocalDate;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +30,7 @@ public class StockOrderService implements StockOrderUseCase {
 
 	@Override
 	public Output execute(Input input) {
-		AccountAsset accountAsset = accountAssetPort.findAssetByKakaoId(input.kakaoId);
+		AccountAsset accountAsset = accountAssetPort.findByProviderId(input.providerId);
 		StockMetadata stockMetadata = stockMetadataPort.findStockByStockCode(input.stockCode);
 		if (stockMetadata == null) {
 			throw new CustomException(CustomExceptionDetail.STOCK_NOT_FOUND);
@@ -58,14 +57,13 @@ public class StockOrderService implements StockOrderUseCase {
 	private void handleBuyOrder(StockOrder stockOrder, AccountAsset accountAsset) {
 		HoldingIndividualStock holdingIndividualStock = holdingStockPort.findHoldingByStockCodeAndAssetId(
 				stockOrder.getStockCode(), accountAsset.getId());
-		HoldingIndividualStock updatedHoldingIndividualStock = updateHoldingIndividualStock(stockOrder,
-				holdingIndividualStock, accountAsset);
 
-		Long totalPrice = calculateTotalPrice(stockOrder);
-		boolean isStockEmpty = holdingIndividualStock == null;
-		AccountAsset updatedAccountAsset = updateAsset(totalPrice, accountAsset,
-				stockOrder.getTradeType(), isStockEmpty);
+		boolean isFirstBuy = holdingIndividualStock == null;
+		HoldingIndividualStock updatedHoldingIndividualStock = isFirstBuy
+				? new HoldingIndividualStock(stockOrder, accountAsset.getId())
+				: holdingIndividualStock.updateWhenBuyStock(stockOrder);
 
+		AccountAsset updatedAccountAsset = accountAsset.updateWhenBuyStock(stockOrder, isFirstBuy);
 		HoldingIndividualStock savedHoldingIndividualStock = holdingStockPort.save(
 				updatedHoldingIndividualStock);
 		accountAssetPort.saveAsset(updatedAccountAsset);
@@ -81,95 +79,24 @@ public class StockOrderService implements StockOrderUseCase {
 			throw new CustomException(CustomExceptionDetail.NO_HOLDING_STOCK);
 		}
 
-		HoldingIndividualStock updatedHoldingIndividualStock = updateHoldingIndividualStock(stockOrder,
-				holdingIndividualStock, accountAsset);
+		boolean isLastStockSold = holdingIndividualStock.getQuantity() == stockOrder.getOrderQuantity();
+		HoldingIndividualStock updatedHoldingIndividualStock = isLastStockSold
+				? null
+				: holdingIndividualStock.updateWhenSellStock(stockOrder);
 
-		Long totalPrice = calculateTotalPrice(stockOrder);
-		boolean isStockEmpty = false;
-		AccountAsset updatedAccountAsset = updateAsset(totalPrice, accountAsset,
-				stockOrder.getTradeType(), isStockEmpty);
+		AccountAsset updatedAccountAsset = accountAsset.updateWhenSellStock(stockOrder,
+				isLastStockSold);
 
-		if (updatedHoldingIndividualStock != null) {
+		if (isLastStockSold) {
+			holdingStockPort.delete(holdingIndividualStock);
+		} else {
 			holdingStockPort.save(updatedHoldingIndividualStock);
 		}
 		AccountAsset savedAccountAsset = accountAssetPort.saveAsset(updatedAccountAsset);
 	}
 
-	private HoldingIndividualStock updateHoldingIndividualStock(StockOrder stockOrder,
-			HoldingIndividualStock holdingIndividualStock, AccountAsset accountAsset) {
-
-		if (stockOrder.getTradeType() == TradeType.BUY && holdingIndividualStock == null) {
-			return new HoldingIndividualStock(stockOrder, accountAsset.getId());
-		}
-
-		if (stockOrder.getTradeType() == TradeType.SELL && Objects.equals(
-				holdingIndividualStock.getQuantity(), stockOrder.getOrderQuantity())) {
-			holdingStockPort.delete(holdingIndividualStock);
-			return null;
-		}
-
-		//보유 주식 수, 평균 매수가 변경
-		Long totalPrice = calculateTotalPrice(stockOrder);
-		Long newQuantity =
-				stockOrder.getTradeType() == TradeType.BUY
-						? holdingIndividualStock.getQuantity() + stockOrder.getOrderQuantity()
-						: holdingIndividualStock.getQuantity() - stockOrder.getOrderQuantity();
-		Long newValuation = stockOrder.getTradeType() == TradeType.BUY
-				? holdingIndividualStock.getValuation() + totalPrice
-				: holdingIndividualStock.getValuation() - totalPrice;
-		Long initialTotalPurchasePrice =
-				holdingIndividualStock.getAveragePurchasePrice() * holdingIndividualStock.getQuantity();
-		Long newTotalPurchasePrice = stockOrder.getTradeType() == TradeType.BUY
-				? initialTotalPurchasePrice + totalPrice
-				: initialTotalPurchasePrice - totalPrice;
-		Long newAveragePurchasePrice = newTotalPurchasePrice / newQuantity;
-		Double newYield =
-				((double) (stockOrder.getStockPrice() - newAveragePurchasePrice) / newAveragePurchasePrice)
-						* 100;
-
-		return new HoldingIndividualStock(
-				holdingIndividualStock.getId(),
-				holdingIndividualStock.getStockCode(),
-				holdingIndividualStock.getStockName(),
-				holdingIndividualStock.getCurrentPrice(),
-				newAveragePurchasePrice,
-				newQuantity,
-				newValuation,
-				newYield,
-				holdingIndividualStock.getAccountAssetId()
-		);
-	}
-
-	private AccountAsset updateAsset(Long totalPrice, AccountAsset accountAsset,
-			TradeType tradeType, boolean isStockEmpty) {
-		// 총 자산, 투자 수익률 변화 x
-		// 예수금 변화
-		// 총 투자금 변화
-		// 총 종목수 변화
-		if (tradeType == TradeType.BUY) {
-			accountAsset.setDeposit(accountAsset.getDeposit() - totalPrice);
-			accountAsset.setTotalHoldingsValue(accountAsset.getTotalHoldingsValue() + totalPrice);
-
-			if (isStockEmpty) {
-				accountAsset.setTotalHoldingsQuantity(accountAsset.getTotalHoldingsQuantity() + 1);
-			}
-			return accountAsset;
-		}
-		accountAsset.setDeposit(accountAsset.getDeposit() + totalPrice);
-		accountAsset.setTotalHoldingsValue(accountAsset.getTotalHoldingsValue() - totalPrice);
-
-		if (isStockEmpty) {
-			accountAsset.setTotalHoldingsQuantity(accountAsset.getTotalHoldingsQuantity() + 1);
-		}
-		return accountAsset;
-	}
-
-	private Long calculateTotalPrice(StockOrder stockOrder) {
-		return stockOrder.getStockPrice() * stockOrder.getOrderQuantity();
-	}
-
 	private void validateBuy(AccountAsset accountAsset, StockOrder stockOrder, LocalDate orderDate) {
-		StockBuyable stockBuyable = getStockBuyable(accountAsset.getKakaoId(),
+		StockBuyable stockBuyable = getStockBuyable(accountAsset.getProviderId(),
 				stockOrder.getStockCode(), orderDate);
 
 		if (stockBuyable.getBuyableQuantity() < stockOrder.getOrderQuantity()) {
@@ -179,7 +106,7 @@ public class StockOrderService implements StockOrderUseCase {
 	}
 
 	private void validateSell(AccountAsset accountAsset, StockOrder stockOrder, LocalDate orderDate) {
-		StockSellable stockSellable = getStockSellable(accountAsset.getKakaoId(),
+		StockSellable stockSellable = getStockSellable(accountAsset.getProviderId(),
 				stockOrder.getStockCode(), orderDate);
 
 		if (stockOrder.getOrderQuantity() > stockSellable.getSellableQuantity()) {
@@ -188,8 +115,8 @@ public class StockOrderService implements StockOrderUseCase {
 
 	}
 
-	private StockBuyable getStockBuyable(String kakaoId, String stockCode, LocalDate buyDate) {
-		AccountAsset accountAsset = accountAssetPort.findAssetByKakaoId(kakaoId);
+	private StockBuyable getStockBuyable(String providerId, String stockCode, LocalDate buyDate) {
+		AccountAsset accountAsset = accountAssetPort.findByProviderId(providerId);
 		StockMetadata stockMetadata = stockMetadataPort.findStockByStockCode(stockCode);
 		StockDailyHistory stockDailyHistory = stockHistoryPort.findStockHistoryByDate(
 				stockMetadata.getId(), buyDate);
@@ -201,8 +128,8 @@ public class StockOrderService implements StockOrderUseCase {
 				buyableQuantity);
 	}
 
-	private StockSellable getStockSellable(String kakaoId, String stockCode, LocalDate buyDate) {
-		AccountAsset accountAsset = accountAssetPort.findAssetByKakaoId(kakaoId);
+	private StockSellable getStockSellable(String providerId, String stockCode, LocalDate buyDate) {
+		AccountAsset accountAsset = accountAssetPort.findByProviderId(providerId);
 		HoldingIndividualStock holdingIndividualStock = holdingStockPort.findHoldingByStockCodeAndAssetId(
 				stockCode, accountAsset.getId());
 		StockMetadata stockMetadata = stockMetadataPort.findStockByStockCode(stockCode);

@@ -4,7 +4,7 @@ import com.Toou.Toou.domain.model.AccountAsset;
 
 public interface AccountAssetPort {
 
-	AccountAsset findAssetByKakaoId(String kakaoId);
+	AccountAsset findByProviderId(String providerId);
 
 	AccountAsset saveAsset(AccountAsset accountAsset);
 }

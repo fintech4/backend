@@ -30,7 +30,7 @@ public class HoldingIndividualDto {
 	public static HoldingIndividualDto fromDomainModel(HoldingIndividualStock domainModel) {
 		return new HoldingIndividualDto(
 				domainModel.getStockName(),
-				domainModel.getAveragePurchasePrice(),
+				domainModel.getAverageBuyPrice(),
 				domainModel.getCurrentPrice(),
 				domainModel.getQuantity(),
 				domainModel.getValuation(),

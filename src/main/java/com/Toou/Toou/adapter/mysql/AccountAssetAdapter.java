@@ -16,8 +16,8 @@ public class AccountAssetAdapter implements AccountAssetPort {
 	private final AccountAssetJpaRepository accountAssetJpaRepository;
 
 	@Override
-	public AccountAsset findAssetByKakaoId(String kakaoId) {
-		AccountAssetEntity entity = accountAssetJpaRepository.findByKakaoId(kakaoId)
+	public AccountAsset findByProviderId(String providerId) {
+		AccountAssetEntity entity = accountAssetJpaRepository.findByProviderId(providerId)
 				.orElseThrow(() -> new CustomException(CustomExceptionDetail.USER_NOT_FOUND));
 		return toDomainModel(entity);
 	}
@@ -32,24 +32,28 @@ public class AccountAssetAdapter implements AccountAssetPort {
 	private AccountAsset toDomainModel(AccountAssetEntity entity) {
 		return new AccountAsset(
 				entity.getId(),
-				entity.getKakaoId(),
+				entity.getOauthProvider(),
+				entity.getProviderId(),
 				entity.getTotalAsset(),
 				entity.getDeposit(),
 				entity.getTotalHoldingsValue(),
 				entity.getTotalHoldingsQuantity(),
-				entity.getInvestmentYield()
+				entity.getInvestmentYield(),
+				entity.getTotalPrincipal()
 		);
 	}
 
 	private AccountAssetEntity toEntity(AccountAsset accountAsset) {
 		return new AccountAssetEntity(
 				accountAsset.getId(),
-				accountAsset.getKakaoId(),
+				accountAsset.getOauthProvider(),
+				accountAsset.getProviderId(),
 				accountAsset.getTotalAsset(),
 				accountAsset.getDeposit(),
 				accountAsset.getTotalHoldingsValue(),
 				accountAsset.getTotalHoldingsQuantity(),
-				accountAsset.getInvestmentYield()
+				accountAsset.getInvestmentYield(),
+				accountAsset.getTotalPrincipal()
 		);
 	}
 }

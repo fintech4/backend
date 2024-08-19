@@ -14,7 +14,7 @@ public interface AccountHoldingUseCase {
 	@Data
 	class Input {
 
-		String kakaoId;
+		String providerId;
 		LocalDate todayDate;
 	}
 
