@@ -46,17 +46,17 @@ public class AccountController {
 
 	@GetMapping("/assets")
 	ResponseEntity<AccountAssetResponse> asset(
-			@CookieValue(value = "kakaoId", required = true) String kakaoId) {
-		AccountAsset accountAsset = getAccountAssetByKakaoId(kakaoId);
+			@CookieValue(value = "providerId", required = true) String providerId) {
+		AccountAsset accountAsset = getAccountAssetByProviderId(providerId);
 		AccountAssetResponse response = AccountAssetResponse.fromDomainModel(accountAsset);
 		return ResponseEntity.ok().body(response);
 	}
 
 	@GetMapping("/holdings")
 	ResponseEntity<HoldingListResponse> holdingListStock(
-			@CookieValue(value = "kakaoId", required = true) String kakaoId) {
+			@CookieValue(value = "providerId", required = true) String providerId) {
 		LocalDate todayDate = getTodayDate();
-		AccountHoldingUseCase.Input input = new AccountHoldingUseCase.Input(kakaoId, todayDate);
+		AccountHoldingUseCase.Input input = new AccountHoldingUseCase.Input(providerId, todayDate);
 		AccountHoldingUseCase.Output output = accountHoldingUseCase.execute(input);
 		HoldingListResponse response = new HoldingListResponse(true, output.getHoldings().stream().map(
 				HoldingIndividualDto::fromDomainModel).toList());
@@ -65,11 +65,11 @@ public class AccountController {
 
 	@GetMapping("/stocks/{stockCode}/sellable")
 	ResponseEntity<OrderableQuantityResponse> sellableStockCount(
-			@CookieValue(value = "kakaoId") String kakaoId,
+			@CookieValue(value = "providerId") String providerId,
 			@PathVariable String stockCode) {
-		AccountAsset accountAsset = getAccountAssetByKakaoId(kakaoId);
+		AccountAsset accountAsset = getAccountAssetByProviderId(providerId);
 		SellableStockUseCase.Input input = new SellableStockUseCase.Input(stockCode,
-				kakaoId);
+				providerId);
 		SellableStockUseCase.Output output = sellableStockUseCase.execute(input);
 		OrderableQuantityResponse response = OrderableQuantityResponse.fromDomainModel(
 				output.getStockSellable());
@@ -78,12 +78,12 @@ public class AccountController {
 
 	@GetMapping("/stocks/{stockCode}/buyable")
 	ResponseEntity<OrderableQuantityResponse> buyableStockCount(
-			@CookieValue(value = "kakaoId") String kakaoId,
+			@CookieValue(value = "providerId") String providerId,
 			@PathVariable String stockCode) {
-		AccountAsset accountAsset = getAccountAssetByKakaoId(kakaoId);
+		AccountAsset accountAsset = getAccountAssetByProviderId(providerId);
 		LocalDate todayDate = getTodayDate();
 		BuyableStockUseCase.Input input = new BuyableStockUseCase.Input(stockCode, todayDate,
-				kakaoId);
+				providerId);
 		BuyableStockUseCase.Output output = buyableStockUseCase.execute(input);
 		OrderableQuantityResponse response = OrderableQuantityResponse.fromDomainModel(
 				output.getStockBuyable());
@@ -92,12 +92,12 @@ public class AccountController {
 
 	@PostMapping("/stocks/{stockCode}/order")
 	ResponseEntity<VoidResponse> orderStock(
-			@CookieValue(value = "kakaoId") String kakaoId,
+			@CookieValue(value = "providerId") String providerId,
 			@Valid @RequestBody StockOrderRequest request,
 			@PathVariable String stockCode) {
 		LocalDate todayDate = getTodayDate();
 		StockOrderUseCase.Input input = new StockOrderUseCase.Input(stockCode, todayDate,
-				kakaoId, request.getTradeType(), request.getOrderQuantity());
+				providerId, request.getTradeType(), request.getOrderQuantity());
 		StockOrderUseCase.Output output = stockOrderUseCase.execute(input);
 		VoidResponse response = new VoidResponse(true);
 		return ResponseEntity.ok().body(response);
@@ -107,8 +107,8 @@ public class AccountController {
 		return dateFrom.isEqual(dateTo) || dateFrom.isBefore(dateTo);
 	}
 
-	private AccountAsset getAccountAssetByKakaoId(String kakaoId) {
-		AccountAssetUseCase.Input input = new AccountAssetUseCase.Input(kakaoId);
+	private AccountAsset getAccountAssetByProviderId(String providerId) {
+		AccountAssetUseCase.Input input = new AccountAssetUseCase.Input(providerId);
 		AccountAssetUseCase.Output output = accountAssetUseCase.execute(input);
 		return output.getAccountAsset();
 	}

@@ -20,13 +20,13 @@ public class AuthController {
 	private final AccountAssetUseCase accountAssetUseCase;
 
 	@GetMapping("/login/kakao")
-	@Operation(summary = "카카오 로그인 데모", description = "kakaoId로 더미 데이터인 kakao123, kakao456 를 입력하시면 돼요 ")
+	@Operation(summary = "카카오 로그인 데모", description = "providerId로 더미 데이터인 kakao123, kakao456 를 입력하시면 돼요 ")
 //TODO: OAuth 완료 후 수정
-	public ResponseEntity<VoidResponse> loginWithKakao(@RequestParam String kakaoId,
+	public ResponseEntity<VoidResponse> loginWithKakao(@RequestParam String providerId,
 			HttpServletResponse response) {
-		AccountAssetUseCase.Input input = new AccountAssetUseCase.Input(kakaoId);
+		AccountAssetUseCase.Input input = new AccountAssetUseCase.Input(providerId);
 		AccountAssetUseCase.Output output = accountAssetUseCase.execute(input);
-		Cookie cookie = new Cookie("kakaoId", kakaoId);
+		Cookie cookie = new Cookie("providerId", providerId);
 		cookie.setHttpOnly(true); // 보안 설정
 		cookie.setPath("/");
 		cookie.setMaxAge(7 * 24 * 60 * 60); // 7일 동안 유효
