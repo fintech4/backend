@@ -20,7 +20,7 @@ public class BuyableStockService implements BuyableStockUseCase {
 
 	@Override
 	public Output execute(Input input) {
-		AccountAsset accountAsset = accountAssetPort.findAssetByKakaoId(input.kakaoId);
+		AccountAsset accountAsset = accountAssetPort.findByProviderId(input.providerId);
 		StockMetadata stockMetadata = stockMetadataPort.findStockByStockCode(input.stockCode);
 		StockDailyHistory stockDailyHistory = stockHistoryPort.findStockHistoryByDate(
 				stockMetadata.getId(), input.buyDate);

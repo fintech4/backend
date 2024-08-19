@@ -25,7 +25,7 @@ public class AccountHoldingService implements AccountHoldingUseCase {
 	@Transactional
 	@Override
 	public Output execute(AccountHoldingUseCase.Input input) {
-		AccountAsset accountAsset = accountAssetPort.findAssetByKakaoId(input.kakaoId);
+		AccountAsset accountAsset = accountAssetPort.findByProviderId(input.providerId);
 		List<HoldingIndividualStock> holdings = holdingStockPort.findAllHoldingsByAccountAssetId(
 				accountAsset.getId());
 

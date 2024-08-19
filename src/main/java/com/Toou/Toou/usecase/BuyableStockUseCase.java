@@ -15,7 +15,7 @@ public interface BuyableStockUseCase {
 
 		String stockCode;
 		LocalDate buyDate;
-		String kakaoId;
+		String providerId;
 	}
 
 	@AllArgsConstructor

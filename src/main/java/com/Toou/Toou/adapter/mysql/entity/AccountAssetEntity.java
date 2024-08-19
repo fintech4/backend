@@ -1,8 +1,11 @@
 package com.Toou.Toou.adapter.mysql.entity;
 
 
+import com.Toou.Toou.domain.model.OAuthProvider;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,8 +23,12 @@ public class AccountAssetEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "kakao_id", nullable = false)
-	private String kakaoId;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "oauth_provider", nullable = false)
+	private OAuthProvider oauthProvider;
+
+	@Column(name = "provider_id", nullable = false)
+	private String providerId;
 
 	@Column(name = "total_asset", nullable = false)
 	private Long totalAsset;

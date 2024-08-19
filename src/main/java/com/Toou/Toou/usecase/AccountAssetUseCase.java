@@ -12,7 +12,7 @@ public interface AccountAssetUseCase {
 	@Data
 	class Input {
 
-		String kakaoId;
+		String providerId;
 	}
 
 	@AllArgsConstructor

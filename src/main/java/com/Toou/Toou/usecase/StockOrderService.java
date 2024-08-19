@@ -30,7 +30,7 @@ public class StockOrderService implements StockOrderUseCase {
 
 	@Override
 	public Output execute(Input input) {
-		AccountAsset accountAsset = accountAssetPort.findAssetByKakaoId(input.kakaoId);
+		AccountAsset accountAsset = accountAssetPort.findByProviderId(input.providerId);
 		StockMetadata stockMetadata = stockMetadataPort.findStockByStockCode(input.stockCode);
 		if (stockMetadata == null) {
 			throw new CustomException(CustomExceptionDetail.STOCK_NOT_FOUND);
@@ -96,7 +96,7 @@ public class StockOrderService implements StockOrderUseCase {
 	}
 
 	private void validateBuy(AccountAsset accountAsset, StockOrder stockOrder, LocalDate orderDate) {
-		StockBuyable stockBuyable = getStockBuyable(accountAsset.getKakaoId(),
+		StockBuyable stockBuyable = getStockBuyable(accountAsset.getProviderId(),
 				stockOrder.getStockCode(), orderDate);
 
 		if (stockBuyable.getBuyableQuantity() < stockOrder.getOrderQuantity()) {
@@ -106,7 +106,7 @@ public class StockOrderService implements StockOrderUseCase {
 	}
 
 	private void validateSell(AccountAsset accountAsset, StockOrder stockOrder, LocalDate orderDate) {
-		StockSellable stockSellable = getStockSellable(accountAsset.getKakaoId(),
+		StockSellable stockSellable = getStockSellable(accountAsset.getProviderId(),
 				stockOrder.getStockCode(), orderDate);
 
 		if (stockOrder.getOrderQuantity() > stockSellable.getSellableQuantity()) {
@@ -115,8 +115,8 @@ public class StockOrderService implements StockOrderUseCase {
 
 	}
 
-	private StockBuyable getStockBuyable(String kakaoId, String stockCode, LocalDate buyDate) {
-		AccountAsset accountAsset = accountAssetPort.findAssetByKakaoId(kakaoId);
+	private StockBuyable getStockBuyable(String providerId, String stockCode, LocalDate buyDate) {
+		AccountAsset accountAsset = accountAssetPort.findByProviderId(providerId);
 		StockMetadata stockMetadata = stockMetadataPort.findStockByStockCode(stockCode);
 		StockDailyHistory stockDailyHistory = stockHistoryPort.findStockHistoryByDate(
 				stockMetadata.getId(), buyDate);
@@ -128,8 +128,8 @@ public class StockOrderService implements StockOrderUseCase {
 				buyableQuantity);
 	}
 
-	private StockSellable getStockSellable(String kakaoId, String stockCode, LocalDate buyDate) {
-		AccountAsset accountAsset = accountAssetPort.findAssetByKakaoId(kakaoId);
+	private StockSellable getStockSellable(String providerId, String stockCode, LocalDate buyDate) {
+		AccountAsset accountAsset = accountAssetPort.findByProviderId(providerId);
 		HoldingIndividualStock holdingIndividualStock = holdingStockPort.findHoldingByStockCodeAndAssetId(
 				stockCode, accountAsset.getId());
 		StockMetadata stockMetadata = stockMetadataPort.findStockByStockCode(stockCode);

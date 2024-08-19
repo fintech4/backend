@@ -20,7 +20,7 @@ public class SellableStockService implements SellableStockUseCase {
 
 	@Override
 	public Output execute(Input input) {
-		AccountAsset accountAsset = accountAssetPort.findAssetByKakaoId(input.kakaoId);
+		AccountAsset accountAsset = accountAssetPort.findByProviderId(input.providerId);
 		HoldingIndividualStock holdingIndividualStock = holdingStockPort.findHoldingByStockCodeAndAssetId(
 				input.stockCode, accountAsset.getId());
 		StockMetadata stockMetadata = stockMetadataPort.findStockByStockCode(input.stockCode);

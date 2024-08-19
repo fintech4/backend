@@ -12,7 +12,8 @@ import lombok.NoArgsConstructor;
 public class AccountAsset {
 
 	private Long id;
-	private String kakaoId;
+	private OAuthProvider oauthProvider; // OAuth 제공자 타입
+	private String providerId; // OAuth 제공자에서의 유저 ID
 	private Long totalAsset;
 	private Long deposit;
 	private Long totalHoldingsValue;
@@ -31,7 +32,8 @@ public class AccountAsset {
 
 		return new AccountAsset(
 				this.id,
-				this.kakaoId,
+				this.oauthProvider,
+				this.providerId,
 				this.totalAsset,
 				newDeposit,
 				newTotalHoldingsValue,
@@ -53,7 +55,8 @@ public class AccountAsset {
 
 		return new AccountAsset(
 				this.id,
-				this.kakaoId,
+				this.oauthProvider,
+				this.providerId,
 				this.totalAsset,
 				newDeposit,
 				newTotalHoldingsValue,
@@ -70,7 +73,8 @@ public class AccountAsset {
 
 		return new AccountAsset(
 				this.id,
-				this.kakaoId,
+				this.oauthProvider,
+				this.providerId,
 				newTotalAsset,
 				this.deposit,
 				totalHoldingsValue,
