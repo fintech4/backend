@@ -91,16 +91,6 @@ public class StockOrderDomainTest {
       assertThat(updatedHolding.getValuation()).isEqualTo(stockPrice * orderQuantity);
       assertThat(updatedHolding.getYield()).isEqualTo(0.0); // 신규 매수이므로 수익률은 0
     }
-
-    @Test
-    @DisplayName("DeleteHolding 값 false")
-    void testBuyStockDeleteHolding() {
-      // when
-      StockTransactionResultDto resultDto = stockOrder.handleBuy(accountAsset, null);
-
-      // then
-      assertThat(resultDto.deleteHolding()).isFalse();
-    }
   }
 
 }

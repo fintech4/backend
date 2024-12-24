@@ -85,7 +85,7 @@ public class StockOrderService implements StockOrderUseCase {
 
   private void saveSellResults(StockTransactionResultDto stockTransactionResultDto) {
     HoldingIndividualStock holdingIndividualStock = stockTransactionResultDto.updatedHolding();
-    if (stockTransactionResultDto.deleteHolding()) {
+    if (holdingIndividualStock.isSellAll()) {
       holdingStockPort.delete(holdingIndividualStock);
     } else {
       holdingStockPort.save(holdingIndividualStock);

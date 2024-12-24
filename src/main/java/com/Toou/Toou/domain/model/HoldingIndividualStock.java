@@ -110,4 +110,8 @@ public class HoldingIndividualStock {
         this.principal
     );
   }
+
+  public boolean isSellAll() {
+    return this.quantity == 0;
+  }
 }

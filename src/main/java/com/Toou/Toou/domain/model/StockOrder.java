@@ -30,7 +30,7 @@ public class StockOrder {
         ? new HoldingIndividualStock(this, accountAsset.getId())
         : holdingIndividualStock.updateWhenBuyStock(this);
     AccountAsset updatedAccountAsset = accountAsset.updateWhenBuyStock(this, isFirstBuy);
-    return new StockTransactionResultDto(updatedHolding, updatedAccountAsset, false);
+    return new StockTransactionResultDto(updatedHolding, updatedAccountAsset);
   }
 
   public StockTransactionResultDto handleSell(AccountAsset accountAsset,
@@ -39,7 +39,7 @@ public class StockOrder {
     boolean isLastStockSold = holdingIndividualStock.getQuantity().equals(this.getOrderQuantity());
     HoldingIndividualStock updatedHolding = holdingIndividualStock.updateWhenSellStock(this);
     AccountAsset updatedAccountAsset = accountAsset.updateWhenSellStock(this, isLastStockSold);
-    return new StockTransactionResultDto(updatedHolding, updatedAccountAsset, isLastStockSold);
+    return new StockTransactionResultDto(updatedHolding, updatedAccountAsset);
   }
 
   public void validateBuy(Long deposit) {
