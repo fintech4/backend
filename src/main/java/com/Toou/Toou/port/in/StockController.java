@@ -31,9 +31,9 @@ public class StockController {
 	private final ListStockMetadataUseCase listStockMetadataUseCase;
 	private final ListStockHistoryUseCase listStockHistoryUseCase;
 
-	@Value("${dummy.start-date}")
+	@Value("${stock.history-start-date}")
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	private LocalDate DUMMY_START_DATE;
+	private LocalDate STOCK_HISTORY_START_DATE;
 
 	@GetMapping
 	ResponseEntity<StockSearchListResponse> listStockMetadataByName(@RequestParam final String name,
@@ -59,7 +59,7 @@ public class StockController {
 			@RequestParam(value = "dateTo", required = false) LocalDate dateTo // "yyyy-MM-dd"
 	) {
 		LocalDate todayDate = getTodayDate();
-		dateFrom = dateFrom == null ? DUMMY_START_DATE : dateFrom;
+		dateFrom = dateFrom == null ? STOCK_HISTORY_START_DATE : dateFrom;
 		dateTo = dateTo == null ? todayDate : dateTo;
 
 		if (!isValidDateRange(dateFrom, dateTo)) {
