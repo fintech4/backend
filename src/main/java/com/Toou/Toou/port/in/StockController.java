@@ -35,14 +35,6 @@ public class StockController {
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private LocalDate DUMMY_START_DATE;
 
-	@Value("${demo}")
-	boolean isDemo;
-
-	@Value("${time-machine}")
-	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	private LocalDate timeMachineEndDate;
-
-
 	@GetMapping
 	ResponseEntity<StockSearchListResponse> listStockMetadataByName(@RequestParam final String name,
 			@RequestParam(required = false) final Integer limit) {
@@ -118,6 +110,6 @@ public class StockController {
 	}
 
 	private LocalDate getTodayDate() {
-		return isDemo ? timeMachineEndDate : LocalDate.now();
+		return LocalDate.now();
 	}
 }

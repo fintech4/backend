@@ -10,8 +10,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ListStockHistoryService implements ListStockHistoryUseCase {
 
-	private static final Logger log = LoggerFactory.getLogger(ListStockHistoryService.class);
 	private final StockHistoryPort stockHistoryPort;
 	private final StockOpenApiPort stockOpenApiPort;
 	private final StockMetadataPort stockMetadataPort;
