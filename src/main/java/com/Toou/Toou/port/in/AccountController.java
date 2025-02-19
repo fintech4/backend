@@ -15,8 +15,6 @@ import com.Toou.Toou.usecase.StockOrderUseCase;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,13 +34,6 @@ public class AccountController {
 	private final SellableStockUseCase sellableStockUseCase;
 	private final BuyableStockUseCase buyableStockUseCase;
 	private final StockOrderUseCase stockOrderUseCase;
-
-	@Value("${demo}")
-	boolean isDemo;
-
-	@Value("${time-machine}")
-	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	private LocalDate timeMachineEndDate;
 
 	@GetMapping("/assets")
 	ResponseEntity<AccountAssetResponse> asset(
@@ -114,6 +105,6 @@ public class AccountController {
 	}
 
 	private LocalDate getTodayDate() {
-		return isDemo ? timeMachineEndDate : LocalDate.now();
+		return LocalDate.now();
 	}
 }
