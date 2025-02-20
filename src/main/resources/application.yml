@@ -10,7 +10,14 @@ logging:
   level:
     root: INFO  # 로그 레벨 설정
 
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: true  # P6Spy SQL 로그 활성화
+      log-format: "%(currentTime )  | conn=%(connectionId) - %(executionTime) ms | %(sqlSingleLine)"  # SQL 실행 시간 포함
+#      log-format: "[%(date)] [thread-%(thread)] conn=%(connectionId) - %(executionTime) ms - Query: %(sql) /* handler: %(className).%(methodName)"
 ---
+
 spring:
   config:
     activate:

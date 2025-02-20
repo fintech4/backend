@@ -15,8 +15,4 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-    defer-datasource-initialization: true
+    defer-datasource-initialization: true # 초기 데이터 생성 용 data.sql 사용
