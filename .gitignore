@@ -40,3 +40,6 @@ src/main/resources/application-private.yml
 
 ### .pem ###
 *.pem
+
+### mac ###
+.DS_Store
