@@ -9,6 +9,13 @@ spring:
 logging:
   level:
     root: INFO  # 로그 레벨 설정
+    com.p6spy: DEBUG
+  file:
+    name: logs/http-and-query.log
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "{ \"timestamp\": \"%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ}\", \"level\": \"%p\", \"thread\": \"%t\", \"logger\": \"%c{1}\", \"message\": \"%m\" }%n"
+
 
 decorator:
   datasource:

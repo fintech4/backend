@@ -43,3 +43,6 @@ src/main/resources/application-private.yml
 
 ### mac ###
 .DS_Store
+
+### logs ###
+logs/http-and-query.log
