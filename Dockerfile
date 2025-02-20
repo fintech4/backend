@@ -1,7 +1,5 @@
 FROM openjdk:17-jdk-slim
 
-#VOLUME /tmp
-
 ENV TZ=Asia/Seoul
 
 EXPOSE 8080
