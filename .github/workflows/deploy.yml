@@ -39,15 +39,15 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
 
-#      - name: Get Current Time
-#        uses: josStorer/get-current-time@v2.0.0
-#        id: current-time
-#        with:
-#          format: YYYY-MM-DDTHH-mm-ss
-#          utcOffset: "+09:00"
-#
-#      - name: Show Current Time
-#        run: echo "CurrentTime=${{ steps.current-time.outputs.formattedTime }}"
+      #      - name: Get Current Time
+      #        uses: josStorer/get-current-time@v2.0.0
+      #        id: current-time
+      #        with:
+      #          format: YYYY-MM-DDTHH-mm-ss
+      #          utcOffset: "+09:00"
+      #
+      #      - name: Show Current Time
+      #        run: echo "CurrentTime=${{ steps.current-time.outputs.formattedTime }}"
 
       - name: Set up Docker Build
         uses: docker/setup-buildx-action@v3
@@ -104,3 +104,8 @@ jobs:
             fi
 
             sudo docker run -d --name $DOCKER_IMAGENAME -p $DOCKER_HOST_PORT:$DOCKER_CONTAINER_PORT $DOCKER_USERNAME/$DOCKER_IMAGENAME
+
+      - name: Remove Github Actions IP from Security group
+        if: always()
+        run: |
+          aws ec2 revoke-security-group-ingress --group-id ${{ secrets.AWS_SG_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
