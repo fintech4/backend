@@ -109,7 +109,7 @@ jobs:
 
             sudo docker run -d --name $DOCKER_IMAGENAME \
               -p $DOCKER_HOST_PORT:$DOCKER_CONTAINER_PORT \
-              -v toou-log-volume:/logs \  
+              -v toou-log-volume:/logs \
               --log-driver=json-file \
               --log-opt max-size=10m \
               --log-opt max-file=3 \
