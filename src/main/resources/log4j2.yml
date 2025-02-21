@@ -1,0 +1,42 @@
+Configuration:
+  status: info # log4j2가 이 yml 읽고 실행하면서 발생하는 내부 디버깅 로그 레벨.
+
+  properties:
+    property:
+      name: log-path
+      value: "logs"
+
+  appenders: # 어디에 저장할지
+    console:
+      name: Console_Appender
+      target: SYSTEM_OUT  # stdout으로 출력
+      patternLayout:
+        pattern: "%d{yyyy-MM-dd HH:mm:ss}{Asia/Seoul} [%T] %-5level %c{1} - %msg%n"
+        # 시간 스레드id 로그레벨 logger마지막 메세지
+
+    rollingFile:
+      name: RollingFile_Appender
+      fileName: ${log-path}/last-log-file.log
+      filePattern: "${log-path}/%d{yyyy-MM-dd-HH-mm-ss}{Asia/Seoul}.log.gz" # 로그가 압축되는 날짜
+      JsonTemplateLayout:
+        eventTemplateUri: "classpath:logLayout.json"
+      policies:
+        sizeBasedTriggeringPolicy:
+          size: 10MB
+      defaultRolloverStrategy:
+        max: 30
+
+  loggers:
+    root: # 전체 어플리케이션에서 발생하는 모든 로그의 기본 로거
+      level: info
+      appenderRef: # 위에 정의한 appenders name 중 하나
+        - ref: Console_Appender
+        - ref: RollingFile_Appender
+
+    logger:
+      - name: com.p6spy
+        level: debug
+        additivity: false # root의 설정 상속하지 않음
+        appenderRef:
+          - ref: Console_Appender
+          - ref: RollingFile_Appender

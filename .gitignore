@@ -45,4 +45,4 @@ src/main/resources/application-private.yml
 .DS_Store
 
 ### logs ###
-logs/http-and-query.log
+logs/*
