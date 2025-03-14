@@ -24,10 +24,8 @@ public class SellableStockService implements SellableStockUseCase {
 		HoldingIndividualStock holdingIndividualStock = holdingStockPort.findHoldingByStockCodeAndAssetId(
 				input.stockCode, accountAsset.getId());
 		StockMetadata stockMetadata = stockMetadataPort.findStockByStockCode(input.stockCode);
-		Long sellableQuantity =
-				holdingIndividualStock != null ? holdingIndividualStock.getQuantity() : 0L;
-		StockSellable stockSellable = new StockSellable(
-				input.stockCode, stockMetadata.getStockName(), sellableQuantity);
+		StockSellable stockSellable = StockSellable.of(holdingIndividualStock,
+				stockMetadata.getStockCode(), stockMetadata.getStockName());
 		return new Output(stockSellable);
 	}
 }
