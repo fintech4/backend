@@ -14,46 +14,46 @@ import lombok.NoArgsConstructor;
 @Builder
 public class StockOrder {
 
-  private String stockCode;
-  private String stockName;
-  private Long stockPrice;
-  private Long orderQuantity;
-  private TradeType tradeType;
-  private AccountAsset accountAsset;
+	private String stockCode;
+	private String stockName;
+	private Long stockPrice;
+	private Long orderQuantity;
+	private TradeType tradeType;
+	private AccountAsset accountAsset;
 
 
-  public StockTransactionResultDto handleBuy(AccountAsset accountAsset,
-      HoldingIndividualStock holdingIndividualStock) {
-    validateBuy(accountAsset.getDeposit());
-    boolean isFirstBuy = holdingIndividualStock == null;
-    HoldingIndividualStock updatedHolding = isFirstBuy
-        ? new HoldingIndividualStock(this, accountAsset.getId())
-        : holdingIndividualStock.updateWhenBuyStock(this);
-    AccountAsset updatedAccountAsset = accountAsset.updateWhenBuyStock(this, isFirstBuy);
-    return new StockTransactionResultDto(updatedHolding, updatedAccountAsset);
-  }
+	public StockTransactionResultDto handleBuy(AccountAsset accountAsset,
+			HoldingIndividualStock holdingIndividualStock) {
+		validateBuy(accountAsset.getDeposit());
+		boolean isFirstBuy = holdingIndividualStock == null;
+		HoldingIndividualStock updatedHolding = isFirstBuy
+				? new HoldingIndividualStock(this, accountAsset.getId())
+				: holdingIndividualStock.updateWhenBuyStock(this);
+		AccountAsset updatedAccountAsset = accountAsset.updateWhenBuyStock(this, isFirstBuy);
+		return new StockTransactionResultDto(updatedHolding, updatedAccountAsset);
+	}
 
-  public StockTransactionResultDto handleSell(AccountAsset accountAsset,
-      HoldingIndividualStock holdingIndividualStock) {
-    validateSell(holdingIndividualStock);
-    boolean isLastStockSold = holdingIndividualStock.getQuantity().equals(this.getOrderQuantity());
-    HoldingIndividualStock updatedHolding = holdingIndividualStock.updateWhenSellStock(this);
-    AccountAsset updatedAccountAsset = accountAsset.updateWhenSellStock(this, isLastStockSold);
-    return new StockTransactionResultDto(updatedHolding, updatedAccountAsset);
-  }
+	public StockTransactionResultDto handleSell(AccountAsset accountAsset,
+			HoldingIndividualStock holdingIndividualStock) {
+		validateSell(holdingIndividualStock);
+		boolean isLastStockSold = holdingIndividualStock.getQuantity().equals(this.getOrderQuantity());
+		HoldingIndividualStock updatedHolding = holdingIndividualStock.updateWhenSellStock(this);
+		AccountAsset updatedAccountAsset = accountAsset.updateWhenSellStock(this, isLastStockSold);
+		return new StockTransactionResultDto(updatedHolding, updatedAccountAsset);
+	}
 
-  public void validateBuy(Long deposit) {
-    Long buyableQuantity = deposit / this.stockPrice;
-    if (buyableQuantity < this.getOrderQuantity()) {
-      throw new CustomException(CustomExceptionDetail.WRONG_BUY_ORDER);
-    }
-  }
+	private void validateBuy(Long deposit) {
+		Long buyableQuantity = deposit / this.stockPrice;
+		if (buyableQuantity < this.getOrderQuantity()) {
+			throw new CustomException(CustomExceptionDetail.WRONG_BUY_ORDER);
+		}
+	}
 
-  public void validateSell(HoldingIndividualStock holdingIndividualStock) {
-    Long sellableQuantity =
-        holdingIndividualStock != null ? holdingIndividualStock.getQuantity() : 0L;
-    if (sellableQuantity < this.getOrderQuantity()) {
-      throw new CustomException(CustomExceptionDetail.WRONG_SELL_QUANTITY);
-    }
-  }
+	private void validateSell(HoldingIndividualStock holdingIndividualStock) {
+		Long sellableQuantity =
+				holdingIndividualStock != null ? holdingIndividualStock.getQuantity() : 0L;
+		if (sellableQuantity < this.getOrderQuantity()) {
+			throw new CustomException(CustomExceptionDetail.WRONG_SELL_QUANTITY);
+		}
+	}
 }

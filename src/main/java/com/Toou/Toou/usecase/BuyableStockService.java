@@ -24,12 +24,13 @@ public class BuyableStockService implements BuyableStockUseCase {
 		StockMetadata stockMetadata = stockMetadataPort.findStockByStockCode(input.stockCode);
 		StockDailyHistory stockDailyHistory = stockHistoryPort.findStockHistoryByDate(
 				stockMetadata.getId(), input.buyDate);
-		Long closingPrice = stockDailyHistory.getClosingPrice();
-		Long deposit = accountAsset.getDeposit();
-		Long buyableQuantity = deposit / closingPrice;
-		StockBuyable stockBuyable = new StockBuyable(input.stockCode, stockMetadata.getStockName(),
-				closingPrice, deposit,
-				buyableQuantity);
+
+		StockBuyable stockBuyable = StockBuyable.of(
+				input.stockCode,
+				stockMetadata.getStockName(),
+				stockDailyHistory.getClosingPrice(),
+				accountAsset.getDeposit()
+		);
 		return new Output(stockBuyable);
 	}
 }

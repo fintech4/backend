@@ -17,10 +17,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
-@Repository
+@Component //순수 조회 기능만 있어서 @Repository 사용 안함
 @RequiredArgsConstructor
 public class StockOpenApiAdapter implements StockOpenApiPort {
 
