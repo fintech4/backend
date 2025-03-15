@@ -40,6 +40,21 @@ public class StockHistoryAdapter implements StockHistoryPort {
 		return toDomainModel(savedEntity);
 	}
 
+	//	@Override
+//	public void saveAll(List<StockDailyHistory> stockDailyHistories) {
+//		List<StockHistoryEntity> entities = stockDailyHistories.stream()
+//				.map(this::toEntity)
+//				.collect(Collectors.toList());
+//		stockHistoryJpaRepository.saveAll(entities);
+//	}
+
+	@Override
+	public void saveAll(List<StockDailyHistory> stockDailyHistories) {
+		stockDailyHistories.forEach(stockDailyHistory -> {
+			StockHistoryEntity entity = toEntity(stockDailyHistory);
+			stockHistoryJpaRepository.insertIgnore(entity);
+		});
+	}
 
 	private StockDailyHistory toDomainModel(StockHistoryEntity entity) {
 		return new StockDailyHistory(

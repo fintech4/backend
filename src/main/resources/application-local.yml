@@ -3,9 +3,11 @@ server:
 
 spring:
   datasource:
-    url: ${local-db.url}
-    username: ${local-db.username}
-    password: ${local-db.password}
+    url:
+      jdbc:h2:mem:testdb;MODE=MySQL
+    username: sa
+    password:
+
 
   h2:
     console:
